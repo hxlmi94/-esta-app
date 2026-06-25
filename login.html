@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>ESTA - Giris</title></head>
+<body>
+  <h2>ESTA Giris</h2>
+  <input id="email" type="email" placeholder="E-posta"><br><br>
+  <input id="pass" type="password" placeholder="Sifre"><br><br>
+  <button onclick="girisYap()">Giris Yap</button>
+  <button onclick="kayitOl()">Kayit Ol</button>
+  <p id="msg"></p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://pqwdvquguxddyymcpycl.supabase.co",
+      "sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7"
+    );
+
+    async function girisYap() {
+      const { error } = await sb.auth.signInWithPassword({
+        email: email.value, password: pass.value
+      });
+      msg.textContent = error ? error.message : "Giris basarili!";
+      if (!error) location.href = "panel.html";
+    }
+
+    async function kayitOl() {
+      const { error } = await sb.auth.signUp({
+        email: email.value, password: pass.value
+      });
+      msg.textContent = error ? error.message : "Kayit basarili! Simdi giris yapabilirsin.";
+    }
+  </script>
+</body>
+</html>
