@@ -5,55 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ESTA - Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0D1620; --surface:#16233A; --line:#26344D;
-    --text:#EEF3FA; --muted:#8FA0BC; --accent:#F0A848; --accent-dim:#c98a3a;
+    --bg:#0B0608; --surface:#140A0D; --line:#3A2A2E;
+    --text:#F3E9DC; --muted:#9C8A82;
+    --gold:#C9A24B; --gold-soft:#E3C77E; --wine:#5C1A2B;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh}
+  body{
+    font-family:'Jost',sans-serif; background:var(--bg); color:var(--text); min-height:100vh;
+    background-image:radial-gradient(ellipse at 50% -10%, rgba(92,26,43,.30), transparent 50%);
+  }
   header{
     display:flex; align-items:center; justify-content:space-between;
-    padding:18px 28px; border-bottom:1px solid var(--line); background:var(--surface);
+    padding:20px 30px; border-bottom:1px solid var(--line);
   }
-  .brand{font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; letter-spacing:1px}
-  .brand span{color:var(--accent)}
-  .user-box{display:flex; align-items:center; gap:14px; font-size:14px; color:var(--muted)}
-  .btn{border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; transition:.15s; font-family:inherit}
-  .btn-out{background:transparent; color:var(--muted); border:1px solid var(--line); padding:8px 14px}
-  .btn-out:hover{border-color:var(--accent); color:var(--text)}
-  .wrap{max-width:760px; margin:0 auto; padding:32px 28px}
-  h3{font-family:'Space Grotesk',sans-serif; font-size:18px; margin-bottom:14px}
-  .panel{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px; margin-bottom:24px}
-  .upload-row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .brand{font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; letter-spacing:4px}
+  .brand small{display:block; font-family:'Cormorant Garamond',serif; font-size:9px; letter-spacing:5px; color:var(--gold); text-transform:uppercase; margin-bottom:-4px}
+  .user-box{display:flex; align-items:center; gap:16px; font-size:13px; color:var(--muted); letter-spacing:.5px}
+  .btn{border-radius:2px; cursor:pointer; transition:.2s; font-family:'Jost',sans-serif; font-weight:500; letter-spacing:1.5px; text-transform:uppercase}
+  .btn-out{background:transparent; color:var(--muted); border:1px solid var(--line); padding:9px 16px; font-size:12px}
+  .btn-out:hover{border-color:var(--gold); color:var(--gold-soft)}
+  .wrap{max-width:780px; margin:0 auto; padding:40px 30px}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:30px; margin-bottom:26px; position:relative}
+  .panel::before{content:""; position:absolute; inset:5px; border:1px solid rgba(201,162,75,.15); border-radius:2px; pointer-events:none}
+  h3{font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:600; letter-spacing:1px; margin-bottom:4px}
+  .h3-rule{width:40px; height:1px; background:var(--gold); margin-bottom:20px}
+  .upload-row{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
   input[type=file]{
-    flex:1; min-width:180px; padding:11px; background:#0F1A29; border:1px solid var(--line);
-    border-radius:10px; color:var(--text); font-size:14px;
+    flex:1; min-width:200px; padding:12px; background:#0B0608; border:1px solid var(--line);
+    border-radius:2px; color:var(--text); font-size:14px; font-family:inherit;
   }
   input[type=file]::file-selector-button{
-    background:var(--line); color:var(--text); border:none; padding:7px 12px;
-    border-radius:7px; margin-right:10px; cursor:pointer; font-family:inherit;
+    background:var(--wine); color:var(--text); border:none; padding:8px 14px;
+    border-radius:2px; margin-right:12px; cursor:pointer; font-family:inherit; letter-spacing:.5px;
   }
-  .btn-primary{background:var(--accent); color:#1a1205; padding:11px 20px}
-  .btn-primary:hover{background:var(--accent-dim)}
-  #yuklemeMsg{margin-top:12px; font-size:14px; color:var(--muted)}
+  .btn-primary{background:var(--gold); color:#1a1206; border:1px solid var(--gold); padding:12px 24px; font-size:12px}
+  .btn-primary:hover{background:var(--gold-soft)}
+  #yuklemeMsg{margin-top:14px; font-size:13px; color:var(--gold-soft); letter-spacing:.5px}
   ul{list-style:none}
   li{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:13px 16px; background:#0F1A29; border:1px solid var(--line);
-    border-radius:10px; margin-bottom:10px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:14px 18px; background:#0B0608; border:1px solid var(--line);
+    border-radius:2px; margin-bottom:10px;
   }
-  li a{color:var(--text); text-decoration:none; font-size:14px; word-break:break-all}
-  li a:hover{color:var(--accent)}
-  .btn-del{background:transparent; color:#ff8a8a; border:1px solid #4a2b2b; padding:6px 12px}
-  .btn-del:hover{background:#ff8a8a; color:#2a0d0d}
-  .empty{color:var(--muted); font-size:14px; padding:8px 0}
+  li a{color:var(--text); text-decoration:none; font-size:14px; word-break:break-all; letter-spacing:.3px}
+  li a:hover{color:var(--gold-soft)}
+  .btn-del{background:transparent; color:#c98a8a; border:1px solid #4a2b2e; padding:7px 14px; font-size:11px}
+  .btn-del:hover{background:var(--wine); color:var(--text); border-color:var(--wine)}
+  .empty{color:var(--muted); font-size:14px; padding:6px 0; font-style:italic}
 </style>
 </head>
 <body>
   <header>
-    <div class="brand">EST<span>A</span></div>
+    <div class="brand"><small>Est. Anatolia</small>ESTA</div>
     <div class="user-box">
       <span id="user"></span>
       <button class="btn btn-out" onclick="cikisYap()">Cikis</button>
@@ -62,7 +68,7 @@
 
   <div class="wrap">
     <div class="panel">
-      <h3>Belge Yukle</h3>
+      <h3>Belge Yukle</h3><div class="h3-rule"></div>
       <div class="upload-row">
         <input type="file" id="dosya">
         <button class="btn btn-primary" onclick="dosyaYukle()">Yukle</button>
@@ -71,7 +77,7 @@
     </div>
 
     <div class="panel">
-      <h3>Belgelerim</h3>
+      <h3>Belgelerim</h3><div class="h3-rule"></div>
       <ul id="liste"></ul>
     </div>
   </div>
@@ -99,32 +105,3 @@
       const yol = userId + "/" + Date.now() + "_" + f.name;
       const { error } = await sb.storage.from(BUCKET).upload(yol, f);
       yuklemeMsg.textContent = error ? error.message : "Belge yuklendi.";
-      if (!error) dosyalariListele();
-    }
-
-    async function dosyalariListele() {
-      const { data, error } = await sb.storage.from(BUCKET).list(userId);
-      if (error) return;
-      liste.innerHTML = "";
-      if (!data.length) { liste.innerHTML = '<p class="empty">Henuz belge yok. Ilk belgenizi yukleyin.</p>'; return; }
-      data.forEach(d => {
-        const yol = userId + "/" + d.name;
-        const url = sb.storage.from(BUCKET).getPublicUrl(yol).data.publicUrl;
-        liste.innerHTML += `<li><a href="${url}" target="_blank">${d.name}</a>
-          <button class="btn btn-del" onclick="dosyaSil('${d.name}')">Sil</button></li>`;
-      });
-    }
-
-    async function dosyaSil(ad) {
-      const yol = userId + "/" + ad;
-      const { error } = await sb.storage.from(BUCKET).remove([yol]);
-      if (!error) dosyalariListele();
-    }
-
-    async function cikisYap() {
-      await sb.auth.signOut();
-      location.href = "login.html";
-    }
-  </script>
-</body>
-</html>
