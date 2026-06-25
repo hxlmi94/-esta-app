@@ -3,49 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESTA - Giris</title>
+<title>ESTA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0D1620; --surface:#16233A; --line:#26344D;
-    --text:#EEF3FA; --muted:#8FA0BC; --accent:#F0A848; --accent-dim:#c98a3a;
+    --bg:#0B0608; --surface:#140A0D; --line:#3A2A2E;
+    --text:#F3E9DC; --muted:#9C8A82;
+    --gold:#C9A24B; --gold-soft:#E3C77E; --wine:#5C1A2B;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+    font-family:'Jost',sans-serif; background:var(--bg); color:var(--text);
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
-    background-image:radial-gradient(circle at 20% 20%, rgba(240,168,72,.08), transparent 40%);
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(92,26,43,.35), transparent 55%),
+      radial-gradient(circle at 50% 100%, rgba(201,162,75,.06), transparent 50%);
   }
   .card{
-    width:100%; max-width:380px; background:var(--surface);
-    border:1px solid var(--line); border-radius:16px; padding:36px 30px;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
+    width:100%; max-width:400px; background:var(--surface);
+    border:1px solid var(--line); border-radius:4px; padding:46px 40px;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+    position:relative;
   }
-  .brand{font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; letter-spacing:1px;}
-  .brand span{color:var(--accent)}
-  .sub{color:var(--muted); font-size:14px; margin:6px 0 28px}
-  label{display:block; font-size:13px; color:var(--muted); margin:14px 0 6px}
+  .card::before{
+    content:""; position:absolute; inset:6px; border:1px solid rgba(201,162,75,.25);
+    border-radius:2px; pointer-events:none;
+  }
+  .crest{
+    text-align:center; font-family:'Cormorant Garamond',serif; letter-spacing:8px;
+    font-size:11px; color:var(--gold); margin-bottom:6px; text-transform:uppercase;
+  }
+  .brand{
+    text-align:center; font-family:'Cormorant Garamond',serif; font-weight:700;
+    font-size:52px; letter-spacing:6px; line-height:1; color:var(--text);
+  }
+  .rule{
+    width:50px; height:1px; background:var(--gold); margin:16px auto 8px;
+  }
+  .sub{text-align:center; color:var(--muted); font-size:13px; font-weight:300; letter-spacing:1px; margin-bottom:34px}
+  label{display:block; font-size:11px; color:var(--gold-soft); letter-spacing:2px; text-transform:uppercase; margin:18px 0 7px}
   input{
-    width:100%; padding:13px 14px; background:#0F1A29; border:1px solid var(--line);
-    border-radius:10px; color:var(--text); font-size:15px; outline:none; transition:.15s;
+    width:100%; padding:13px 14px; background:#0B0608; border:1px solid var(--line);
+    border-radius:2px; color:var(--text); font-size:15px; font-family:inherit; outline:none; transition:.2s;
   }
-  input:focus{border-color:var(--accent)}
+  input:focus{border-color:var(--gold)}
   .btn{
-    width:100%; padding:13px; border:none; border-radius:10px; font-size:15px; font-weight:600;
-    cursor:pointer; margin-top:18px; transition:.15s; font-family:inherit;
+    width:100%; padding:14px; border-radius:2px; font-size:13px; letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer; margin-top:22px; transition:.2s; font-family:'Jost',sans-serif; font-weight:500;
   }
-  .btn-primary{background:var(--accent); color:#1a1205}
-  .btn-primary:hover{background:var(--accent-dim)}
-  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line); margin-top:10px}
-  .btn-ghost:hover{border-color:var(--accent); color:var(--text)}
-  #msg{margin-top:16px; font-size:14px; text-align:center; min-height:20px}
+  .btn-primary{background:var(--gold); color:#1a1206; border:1px solid var(--gold)}
+  .btn-primary:hover{background:var(--gold-soft)}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line); margin-top:12px}
+  .btn-ghost:hover{border-color:var(--gold); color:var(--gold-soft)}
+  #msg{margin-top:18px; font-size:13px; text-align:center; min-height:18px; letter-spacing:.5px}
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="brand">EST<span>A</span></div>
-    <div class="sub">Emlak, insaat ve bina yonetimi tek panelde.</div>
+    <div class="crest">Est. Anatolia</div>
+    <div class="brand">ESTA</div>
+    <div class="rule"></div>
+    <div class="sub">Emlak · Insaat · Bina Yonetimi</div>
 
     <label for="email">E-posta</label>
     <input id="email" type="email" placeholder="ornek@sirket.com">
@@ -65,14 +84,14 @@
     );
     async function girisYap() {
       const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
-      msg.textContent = error ? error.message : "Giris basarili!";
-      msg.style.color = error ? "#ff7b7b" : "#7be0a0";
+      msg.textContent = error ? error.message : "Giris basarili.";
+      msg.style.color = error ? "#d98a8a" : "#C9A24B";
       if (!error) location.href = "panel.html";
     }
     async function kayitOl() {
       const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
-      msg.textContent = error ? error.message : "Kayit basarili! Simdi giris yapabilirsin.";
-      msg.style.color = error ? "#ff7b7b" : "#7be0a0";
+      msg.textContent = error ? error.message : "Hesap olusturuldu. Giris yapabilirsiniz.";
+      msg.style.color = error ? "#d98a8a" : "#C9A24B";
     }
   </script>
 </body>
