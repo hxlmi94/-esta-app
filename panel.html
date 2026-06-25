@@ -12,7 +12,7 @@
   <button onclick="dosyaYukle()">Yukle</button>
   <p id="yuklemeMsg"></p>
 
-  <h3>Yuklenen Dosyalar</h3>
+  <h3>Dosyalarim</h3>
   <ul id="liste"></ul>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,10 +22,12 @@
       "sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7"
     );
     const BUCKET = "documents";
+    let userId = null;
 
     (async () => {
       const { data } = await sb.auth.getSession();
       if (!data.session) { location.href = "login.html"; return; }
+      userId = data.session.user.id;
       user.textContent = "Giris yapan: " + data.session.user.email;
       dosyalariListele();
     })();
@@ -33,20 +35,28 @@
     async function dosyaYukle() {
       const f = document.getElementById("dosya").files[0];
       if (!f) { yuklemeMsg.textContent = "Once dosya sec."; return; }
-      const ad = Date.now() + "_" + f.name;
-      const { error } = await sb.storage.from(BUCKET).upload(ad, f);
+      const yol = userId + "/" + Date.now() + "_" + f.name;
+      const { error } = await sb.storage.from(BUCKET).upload(yol, f);
       yuklemeMsg.textContent = error ? error.message : "Yuklendi!";
       if (!error) dosyalariListele();
     }
 
     async function dosyalariListele() {
-      const { data, error } = await sb.storage.from(BUCKET).list();
+      const { data, error } = await sb.storage.from(BUCKET).list(userId);
       if (error) return;
       liste.innerHTML = "";
       data.forEach(d => {
-        const url = sb.storage.from(BUCKET).getPublicUrl(d.name).data.publicUrl;
-        liste.innerHTML += `<li><a href="${url}" target="_blank">${d.name}</a></li>`;
+        const yol = userId + "/" + d.name;
+        const url = sb.storage.from(BUCKET).getPublicUrl(yol).data.publicUrl;
+        liste.innerHTML += `<li><a href="${url}" target="_blank">${d.name}</a>
+          <button onclick="dosyaSil('${d.name}')">Sil</button></li>`;
       });
+    }
+
+    async function dosyaSil(ad) {
+      const yol = userId + "/" + ad;
+      const { error } = await sb.storage.from(BUCKET).remove([yol]);
+      if (!error) dosyalariListele();
     }
 
     async function cikisYap() {
