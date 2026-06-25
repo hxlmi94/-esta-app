@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>ESTA - Panel</title></head>
+<body>
+  <h2>ESTA Panel</h2>
+  <p id="user"></p>
+  <button onclick="cikisYap()">Cikis Yap</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const sb = supabase.createClient(
+      "https://pqwdvquguxddyymcpycl.supabase.co",
+      "sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7"
+    );
+
+    (async () => {
+      const { data } = await sb.auth.getSession();
+      if (!data.session) { location.href = "login.html"; return; }
+      user.textContent = "Giris yapan: " + data.session.user.email;
+    })();
+
+    async function cikisYap() {
+      await sb.auth.signOut();
+      location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
