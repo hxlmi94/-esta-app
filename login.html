@@ -1,13 +1,61 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>ESTA - Giris</title></head>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA - Giris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1620; --surface:#16233A; --line:#26344D;
+    --text:#EEF3FA; --muted:#8FA0BC; --accent:#F0A848; --accent-dim:#c98a3a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    background-image:radial-gradient(circle at 20% 20%, rgba(240,168,72,.08), transparent 40%);
+  }
+  .card{
+    width:100%; max-width:380px; background:var(--surface);
+    border:1px solid var(--line); border-radius:16px; padding:36px 30px;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  }
+  .brand{font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; letter-spacing:1px;}
+  .brand span{color:var(--accent)}
+  .sub{color:var(--muted); font-size:14px; margin:6px 0 28px}
+  label{display:block; font-size:13px; color:var(--muted); margin:14px 0 6px}
+  input{
+    width:100%; padding:13px 14px; background:#0F1A29; border:1px solid var(--line);
+    border-radius:10px; color:var(--text); font-size:15px; outline:none; transition:.15s;
+  }
+  input:focus{border-color:var(--accent)}
+  .btn{
+    width:100%; padding:13px; border:none; border-radius:10px; font-size:15px; font-weight:600;
+    cursor:pointer; margin-top:18px; transition:.15s; font-family:inherit;
+  }
+  .btn-primary{background:var(--accent); color:#1a1205}
+  .btn-primary:hover{background:var(--accent-dim)}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line); margin-top:10px}
+  .btn-ghost:hover{border-color:var(--accent); color:var(--text)}
+  #msg{margin-top:16px; font-size:14px; text-align:center; min-height:20px}
+</style>
+</head>
 <body>
-  <h2>ESTA Giris</h2>
-  <input id="email" type="email" placeholder="E-posta"><br><br>
-  <input id="pass" type="password" placeholder="Sifre"><br><br>
-  <button onclick="girisYap()">Giris Yap</button>
-  <button onclick="kayitOl()">Kayit Ol</button>
-  <p id="msg"></p>
+  <div class="card">
+    <div class="brand">EST<span>A</span></div>
+    <div class="sub">Emlak, insaat ve bina yonetimi tek panelde.</div>
+
+    <label for="email">E-posta</label>
+    <input id="email" type="email" placeholder="ornek@sirket.com">
+    <label for="pass">Sifre</label>
+    <input id="pass" type="password" placeholder="••••••••">
+
+    <button class="btn btn-primary" onclick="girisYap()">Giris Yap</button>
+    <button class="btn btn-ghost" onclick="kayitOl()">Yeni Hesap Olustur</button>
+    <p id="msg"></p>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -15,20 +63,16 @@
       "https://pqwdvquguxddyymcpycl.supabase.co",
       "sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7"
     );
-
     async function girisYap() {
-      const { error } = await sb.auth.signInWithPassword({
-        email: email.value, password: pass.value
-      });
+      const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
       msg.textContent = error ? error.message : "Giris basarili!";
+      msg.style.color = error ? "#ff7b7b" : "#7be0a0";
       if (!error) location.href = "panel.html";
     }
-
     async function kayitOl() {
-      const { error } = await sb.auth.signUp({
-        email: email.value, password: pass.value
-      });
+      const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
       msg.textContent = error ? error.message : "Kayit basarili! Simdi giris yapabilirsin.";
+      msg.style.color = error ? "#ff7b7b" : "#7be0a0";
     }
   </script>
 </body>
