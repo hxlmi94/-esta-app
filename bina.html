@@ -1,0 +1,36 @@
+-- BINALAR
+create table if not exists public.binalar (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  ad text not null,
+  adres text,
+  created_at timestamptz default now()
+);
+
+-- DAIRELER
+create table if not exists public.daireler (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  bina_id uuid not null references public.binalar(id) on delete cascade,
+  daire_no text not null,
+  kat text,
+  tip text,                 -- ornek: 2+1
+  durum text,               -- malik | kiraci | bos
+  malik_ad text, malik_tel text,
+  kiraci_ad text, kiraci_tel text,
+  created_at timestamptz default now()
+);
+
+-- RLS (her kullanici sadece kendi kayitlari)
+alter table public.binalar enable row level security;
+alter table public.daireler enable row level security;
+
+create policy "binalar_select" on public.binalar for select using (auth.uid() = user_id);
+create policy "binalar_insert" on public.binalar for insert with check (auth.uid() = user_id);
+create policy "binalar_update" on public.binalar for update using (auth.uid() = user_id);
+create policy "binalar_delete" on public.binalar for delete using (auth.uid() = user_id);
+
+create policy "daireler_select" on public.daireler for select using (auth.uid() = user_id);
+create policy "daireler_insert" on public.daireler for insert with check (auth.uid() = user_id);
+create policy "daireler_update" on public.daireler for update using (auth.uid() = user_id);
+create policy "daireler_delete" on public.daireler for delete using (auth.uid() = user_id);
