@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Aidat Takibi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0c0d; --panel:#181314; --panel-2:#201719;
+    --line:#352529; --wine:#7b1f2b; --wine-soft:#9a2c3a;
+    --gold:#c9a24b; --gold-soft:#e2c477;
+    --text:#ece4dd; --muted:#9c8f88;
+    --green:#3a7d44; --green-soft:#9fd58a; --red:#b04a4a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 16px;border-radius:8px;transition:.18s}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.sm{padding:6px 12px;font-size:12px}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:22px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px}
+  .controls label{font-size:12px;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:5px}
+  select,input[type=month]{background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  select:focus,input:focus{outline:none;border-color:var(--gold)}
+  .summary{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .stat{flex:1;min-width:150px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .stat .lbl{font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .stat .val{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold-soft)}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+  th{color:var(--gold-soft);font-weight:500;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+  .tutar-input{width:110px;background:#0f0b0c;border:1px solid var(--line);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  .tutar-input:focus{outline:none;border-color:var(--gold)}
+  .tag{font-size:11px;padding:4px 12px;border-radius:20px;letter-spacing:.5px;cursor:pointer;border:1px solid transparent;display:inline-block}
+  .tag.odendi{background:#1c3320;color:var(--green-soft);border-color:#2f5a37}
+  .tag.borc{background:#3a1c1c;color:#e0a0a0;border-color:#5a2f2f}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;border:1px dashed var(--line);border-radius:14px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Aidat Takibi</div></div>
+  <div class="top-actions">
+    <a class="btn" href="bina.html">Bina Yonetimi</a>
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2>Aidat Takibi</h2><p>Bina ve donem secin, dairelerin aidat durumunu yonetin.</p></div>
+  </div>
+  <div class="controls">
+    <div><label>Bina</label><select id="binaSec"></select></div>
+    <div><label>Donem</label><input type="month" id="donemSec"></div>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div id="tabloArea"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://pqwdvquguxddyymcpycl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n)=> Number(n||0).toLocaleString('tr-TR');
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+
+// donem varsayilan = bu ay
+const now = new Date();
+$('donemSec').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+
+async function loadBinalar(){
+  const { data:binalar } = await supabase.from('binalar').select('*').order('created_at');
+  const sel = $('binaSec');
+  if(!binalar || !binalar.length){ sel.innerHTML='<option>Bina yok</option>'; $('tabloArea').innerHTML='<div class="empty">Once Bina Yonetimi\'nden bina/daire ekleyin.</div>'; return; }
+  sel.innerHTML = binalar.map(b=>'<option value="'+b.id+'">'+esc(b.ad)+'</option>').join('');
+  sel.onchange = loadTablo;
+  loadTablo();
+}
+$('donemSec').onchange = loadTablo;
+
+async function loadTablo(){
+  const binaId = $('binaSec').value;
+  const donem = $('donemSec').value;
+  const area = $('tabloArea');
+  if(!binaId || !donem) return;
+  area.innerHTML = '<p style="color:var(--muted)">Yukleniyor...</p>';
+
+  const { data:daireler } = await supabase.from('daireler').select('*').eq('bina_id', binaId).order('daire_no');
+  if(!daireler || !daireler.length){ area.innerHTML='<div class="empty">Bu binada daire yok.</div>'; $('summary').innerHTML=''; return; }
+
+  const { data:aidatlar } = await supabase.from('aidatlar').select('*').eq('donem', donem).in('daire_id', daireler.map(d=>d.id));
+  const aMap = {};
+  (aidatlar||[]).forEach(a=> aMap[a.daire_id]=a );
+
+  let tahsil=0, borc=0;
+  let rows = daireler.map(d=>{
+    const a = aMap[d.id];
+    const odendi = a ? a.odendi : false;
+    const tutar = Number(d.aidat_tutar||0);
+    const kisi = d.durum==='kiraci' ? (d.kiraci_ad||'-') : (d.malik_ad||'-');
+    if(odendi) tahsil+=tutar; else borc+=tutar;
+    const durumTag = odendi
+      ? '<span class="tag odendi" data-toggle="'+d.id+'">Odendi</span>'
+      : '<span class="tag borc" data-toggle="'+d.id+'">Borclu</span>';
+    return '<tr><td><b>'+esc(d.daire_no)+'</b></td><td>'+esc(kisi)+'</td>'+
+      '<td><input class="tutar-input" type="number" min="0" data-tutar="'+d.id+'" value="'+tutar+'"></td>'+
+      '<td>'+durumTag+'</td></tr>';
+  }).join('');
+
+  $('summary').innerHTML =
+    '<div class="stat"><div class="lbl">Toplam Daire</div><div class="val">'+daireler.length+'</div></div>'+
+    '<div class="stat"><div class="lbl">Tahsil Edilen</div><div class="val">'+fmt(tahsil)+' TL</div></div>'+
+    '<div class="stat"><div class="lbl">Kalan Borc</div><div class="val">'+fmt(borc)+' TL</div></div>';
+
+  area.innerHTML = '<table><thead><tr><th>Daire</th><th>Kisi</th><th>Aidat (TL)</th><th>Durum</th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+  // tutar degistir
+  area.querySelectorAll('[data-tutar]').forEach(inp=>{
+    inp.onchange = async ()=>{
+      const { error } = await supabase.from('daireler').update({ aidat_tutar: Number(inp.value||0) }).eq('id', inp.dataset.tutar);
+      if(error){ toast('Tutar kaydedilemedi'); return; }
+      toast('Tutar guncellendi'); loadTablo();
+    };
+  });
+
+  // odendi/borc toggle
+  area.querySelectorAll('[data-toggle]').forEach(tag=>{
+    tag.onclick = async ()=>{
+      const daireId = tag.dataset.toggle;
+      const mevcut = aMap[daireId];
+      const yeniDurum = mevcut ? !mevcut.odendi : true;
+      const payload = {
+        daire_id: daireId,
+        donem: donem,
+        odendi: yeniDurum,
+        odeme_tarihi: yeniDurum ? new Date().toISOString().slice(0,10) : null
+      };
+      const { error } = await supabase.from('aidatlar').upsert(payload, { onConflict:'daire_id,donem' });
+      if(error){ toast('Hata: '+error.message); return; }
+      loadTablo();
+    };
+  });
+}
+
+loadBinalar();
+</script>
+</body>
+</html>
