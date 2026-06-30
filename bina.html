@@ -1,36 +1,282 @@
--- BINALAR
-create table if not exists public.binalar (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  ad text not null,
-  adres text,
-  created_at timestamptz default now()
-);
-
--- DAIRELER
-create table if not exists public.daireler (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  bina_id uuid not null references public.binalar(id) on delete cascade,
-  daire_no text not null,
-  kat text,
-  tip text,                 -- ornek: 2+1
-  durum text,               -- malik | kiraci | bos
-  malik_ad text, malik_tel text,
-  kiraci_ad text, kiraci_tel text,
-  created_at timestamptz default now()
-);
-
--- RLS (her kullanici sadece kendi kayitlari)
-alter table public.binalar enable row level security;
-alter table public.daireler enable row level security;
-
-create policy "binalar_select" on public.binalar for select using (auth.uid() = user_id);
-create policy "binalar_insert" on public.binalar for insert with check (auth.uid() = user_id);
-create policy "binalar_update" on public.binalar for update using (auth.uid() = user_id);
-create policy "binalar_delete" on public.binalar for delete using (auth.uid() = user_id);
-
-create policy "daireler_select" on public.daireler for select using (auth.uid() = user_id);
-create policy "daireler_insert" on public.daireler for insert with check (auth.uid() = user_id);
-create policy "daireler_update" on public.daireler for update using (auth.uid() = user_id);
-create policy "daireler_delete" on public.daireler for delete using (auth.uid() = user_id);
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Bina Yonetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0c0d; --panel:#181314; --panel-2:#201719;
+    --line:#352529; --wine:#7b1f2b; --wine-soft:#9a2c3a;
+    --gold:#c9a24b; --gold-soft:#e2c477;
+    --text:#ece4dd; --muted:#9c8f88;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);
+    color:var(--text); font-family:'Jost',sans-serif; min-height:100vh; font-weight:300;
+  }
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#1a1314,#0e0c0d);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center}
+  .btn{
+    font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--text);
+    padding:9px 16px;border-radius:8px;transition:.18s;
+  }
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:6px 12px;font-size:12px}
+  .btn.danger:hover{background:#3a1416;color:#ffb3b3}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .crumbs{font-size:13px;color:var(--muted);margin-bottom:18px;letter-spacing:.5px}
+  .crumbs span{color:var(--gold-soft);cursor:pointer}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .card{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:14px;padding:20px;
+    transition:.2s;position:relative;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .card:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .card h3{font-size:24px;margin-bottom:4px}
+  .card .meta{color:var(--muted);font-size:13px;min-height:18px}
+  .card .count{margin-top:14px;font-size:13px;color:var(--gold-soft)}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+  .card.clickable{cursor:pointer}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;border:1px dashed var(--line);border-radius:14px}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+  th{color:var(--gold-soft);font-weight:500;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+  td .tag{font-size:11px;padding:3px 9px;border-radius:20px;letter-spacing:.5px}
+  .tag.malik{background:#23381f;color:#9fd58a}
+  .tag.kiraci{background:#1f2c3a;color:#8ab6e0}
+  .tag.bos{background:#3a3320;color:#d6c27a}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:linear-gradient(180deg,#201719,#16100f);border:1px solid var(--line);border-radius:16px;width:100%;max-width:520px;padding:28px;max-height:90vh;overflow:auto}
+  .modal h3{font-size:26px;color:var(--gold);margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .field input,.field select{
+    width:100%;background:#0f0b0c;border:1px solid var(--line);border-radius:8px;
+    padding:11px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px;
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">ESTA</div>
+    <div class="sub">Bina Yonetimi</div>
+  </div>
+  <div class="top-actions">
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <section id="viewBinalar">
+    <div class="head-row">
+      <div>
+        <h2>Binalarim</h2>
+        <p>Kayitli binalariniz. Daireleri gormek icin bir binaya tiklayin.</p>
+      </div>
+      <button class="btn gold" id="addBinaBtn">+ Bina Ekle</button>
+    </div>
+    <div id="binalarGrid" class="grid"></div>
+  </section>
+  <section id="viewDaireler" class="hidden">
+    <div class="crumbs"><span id="backToBinalar">Binalarim</span> &nbsp;/&nbsp; <b id="binaAdiCrumb"></b></div>
+    <div class="head-row">
+      <div>
+        <h2 id="binaBaslik"></h2>
+        <p id="binaAdres"></p>
+      </div>
+      <button class="btn gold" id="addDaireBtn">+ Daire Ekle</button>
+    </div>
+    <div id="dairelerArea"></div>
+  </section>
+</div>
+<div class="overlay" id="binaModal">
+  <div class="modal">
+    <h3>Yeni Bina</h3>
+    <div class="field"><label>Bina Adi *</label><input id="b_ad" placeholder="Ornek: Gul Apartmani"></div>
+    <div class="field"><label>Adres</label><input id="b_adres" placeholder="Mahalle, sokak, no"></div>
+    <div class="modal-actions">
+      <button class="btn" data-close>Vazgec</button>
+      <button class="btn gold" id="saveBina">Kaydet</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="daireModal">
+  <div class="modal">
+    <h3>Yeni Daire</h3>
+    <div class="two">
+      <div class="field"><label>Daire No *</label><input id="d_no" placeholder="Ornek: 5"></div>
+      <div class="field"><label>Kat</label><input id="d_kat" placeholder="Ornek: 2"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Tip</label><input id="d_tip" placeholder="Ornek: 2+1"></div>
+      <div class="field"><label>Durum</label>
+        <select id="d_durum">
+          <option value="malik">Malik oturuyor</option>
+          <option value="kiraci">Kiraci</option>
+          <option value="bos">Bos</option>
+        </select>
+      </div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Malik Adi</label><input id="d_malik" placeholder="Ad Soyad"></div>
+      <div class="field"><label>Malik Tel</label><input id="d_maliktel" placeholder="05.."></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Kiraci Adi</label><input id="d_kiraci" placeholder="Ad Soyad"></div>
+      <div class="field"><label>Kiraci Tel</label><input id="d_kiracitel" placeholder="05.."></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" data-close>Vazgec</button>
+      <button class="btn gold" id="saveDaire">Kaydet</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL = 'https://pqwdvquguxddyymcpycl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let aktifBina = null;
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.overlay').classList.remove('open'));
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+async function loadBinalar(){
+  const grid = $('binalarGrid');
+  grid.innerHTML = '<p style="color:var(--muted)">Yukleniyor...</p>';
+  const { data:binalar, error } = await supabase.from('binalar').select('*').order('created_at',{ascending:true});
+  if(error){ grid.innerHTML='<p style="color:#e08f8f">Hata: '+esc(error.message)+'</p>'; return; }
+  if(!binalar.length){ grid.innerHTML = '<div class="empty">Henuz bina yok. Sag ustten <b>Bina Ekle</b> ile baslayin.</div>'; return; }
+  const { data:daireler } = await supabase.from('daireler').select('bina_id');
+  const sayac = {};
+  (daireler||[]).forEach(d=> sayac[d.bina_id]=(sayac[d.bina_id]||0)+1 );
+  grid.innerHTML = '';
+  binalar.forEach(b=>{
+    const c = document.createElement('div');
+    c.className = 'card clickable';
+    c.innerHTML = '<h3>'+esc(b.ad)+'</h3>'+
+      '<div class="meta">'+(esc(b.adres)||'<i style="color:#5e514c">adres girilmemis</i>')+'</div>'+
+      '<div class="count">'+(sayac[b.id]||0)+' daire</div>'+
+      '<div class="row"><span style="font-size:12px;color:var(--muted)">Daireleri gor &rarr;</span>'+
+      '<button class="btn danger" data-del="'+b.id+'">Sil</button></div>';
+    c.querySelector('[data-del]').onclick = async (e)=>{
+      e.stopPropagation();
+      if(!confirm('"'+b.ad+'" ve icindeki tum daireler silinsin mi?')) return;
+      const { error } = await supabase.from('binalar').delete().eq('id', b.id);
+      if(error){ toast('Silinemedi'); return; }
+      toast('Bina silindi'); loadBinalar();
+    };
+    c.onclick = ()=> openBina(b);
+    grid.appendChild(c);
+  });
+}
+$('addBinaBtn').onclick = ()=>{ $('b_ad').value=''; $('b_adres').value=''; openModal('binaModal'); };
+$('saveBina').onclick = async ()=>{
+  const ad = $('b_ad').value.trim();
+  if(!ad){ toast('Bina adi zorunlu'); return; }
+  const { error } = await supabase.from('binalar').insert({ ad, adres:$('b_adres').value.trim()||null });
+  if(error){ toast('Hata: '+error.message); return; }
+  closeModal('binaModal'); toast('Bina eklendi'); loadBinalar();
+};
+function openBina(b){
+  aktifBina = b;
+  $('viewBinalar').classList.add('hidden');
+  $('viewDaireler').classList.remove('hidden');
+  $('binaBaslik').textContent = b.ad;
+  $('binaAdiCrumb').textContent = b.ad;
+  $('binaAdres').textContent = b.adres || '';
+  loadDaireler();
+}
+$('backToBinalar').onclick = ()=>{
+  $('viewDaireler').classList.add('hidden');
+  $('viewBinalar').classList.remove('hidden');
+  loadBinalar();
+};
+const durumTag = (d)=> d==='malik'?'<span class="tag malik">Malik</span>'
+                    : d==='kiraci'?'<span class="tag kiraci">Kiraci</span>'
+                    : '<span class="tag bos">Bos</span>';
+async function loadDaireler(){
+  const area = $('dairelerArea');
+  area.innerHTML = '<p style="color:var(--muted)">Yukleniyor...</p>';
+  const { data:daireler, error } = await supabase.from('daireler').select('*').eq('bina_id', aktifBina.id).order('daire_no',{ascending:true});
+  if(error){ area.innerHTML='<p style="color:#e08f8f">Hata: '+esc(error.message)+'</p>'; return; }
+  if(!daireler.length){ area.innerHTML='<div class="empty">Bu binada henuz daire yok. <b>Daire Ekle</b> ile baslayin.</div>'; return; }
+  let rows = daireler.map(d=>{
+    const kisi = d.durum==='kiraci' ? (d.kiraci_ad||'-') : (d.malik_ad||'-');
+    const tel  = d.durum==='kiraci' ? (d.kiraci_tel||'') : (d.malik_tel||'');
+    return '<tr><td><b>'+esc(d.daire_no)+'</b></td><td>'+(esc(d.kat)||'-')+'</td><td>'+(esc(d.tip)||'-')+'</td>'+
+      '<td>'+durumTag(d.durum)+'</td><td>'+esc(kisi)+'</td><td>'+esc(tel)+'</td>'+
+      '<td><button class="btn danger" data-deld="'+d.id+'">Sil</button></td></tr>';
+  }).join('');
+  area.innerHTML = '<table><thead><tr><th>Daire</th><th>Kat</th><th>Tip</th><th>Durum</th><th>Kisi</th><th>Tel</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+  area.querySelectorAll('[data-deld]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('Daire silinsin mi?')) return;
+      const { error } = await supabase.from('daireler').delete().eq('id', btn.dataset.deld);
+      if(error){ toast('Silinemedi'); return; }
+      toast('Daire silindi'); loadDaireler();
+    };
+  });
+}
+$('addDaireBtn').onclick = ()=>{
+  ['d_no','d_kat','d_tip','d_malik','d_maliktel','d_kiraci','d_kiracitel'].forEach(i=>$(i).value='');
+  $('d_durum').value='malik';
+  openModal('daireModal');
+};
+$('saveDaire').onclick = async ()=>{
+  const daire_no = $('d_no').value.trim();
+  if(!daire_no){ toast('Daire no zorunlu'); return; }
+  const { error } = await supabase.from('daireler').insert({
+    bina_id: aktifBina.id,
+    daire_no,
+    kat: $('d_kat').value.trim()||null,
+    tip: $('d_tip').value.trim()||null,
+    durum: $('d_durum').value,
+    malik_ad: $('d_malik').value.trim()||null,
+    malik_tel: $('d_maliktel').value.trim()||null,
+    kiraci_ad: $('d_kiraci').value.trim()||null,
+    kiraci_tel: $('d_kiracitel').value.trim()||null,
+  });
+  if(error){ toast('Hata: '+error.message); return; }
+  closeModal('daireModal'); toast('Daire eklendi'); loadDaireler();
+};
+loadBinalar();
+</script>
+</body>
+</html>
