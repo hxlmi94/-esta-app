@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Gider / Gelir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0c0d; --panel:#181314; --panel-2:#201719;
+    --line:#352529; --wine:#7b1f2b; --wine-soft:#9a2c3a;
+    --gold:#c9a24b; --gold-soft:#e2c477;
+    --text:#ece4dd; --muted:#9c8f88;
+    --green-soft:#9fd58a; --red-soft:#e0a0a0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 16px;border-radius:8px;transition:.18s}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:6px 12px;font-size:12px}
+  .btn.danger:hover{background:#3a1416;color:#ffb3b3}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .controls{margin-bottom:22px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px}
+  .controls label{font-size:12px;color:var(--muted);letter-spacing:.5px;display:block;margin-bottom:5px}
+  select,input,textarea{background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+  .summary{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .stat{flex:1;min-width:150px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .stat .lbl{font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .stat .val{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold-soft)}
+  .form-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
+  .form-row .f{display:flex;flex-direction:column;gap:5px}
+  .form-row .f label{font-size:12px;color:var(--muted);letter-spacing:.5px}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+  th{color:var(--gold-soft);font-weight:500;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+  td.tutar{font-weight:500}
+  .gelir{color:var(--green-soft)}
+  .gider{color:var(--red-soft)}
+  .tag{font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+  .tag.gelir{background:#1c3320;color:var(--green-soft)}
+  .tag.gider{background:#3a1c1c;color:var(--red-soft)}
+  .empty{text-align:center;color:var(--muted);padding:50px 20px;border:1px dashed var(--line);border-radius:14px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Gider / Gelir</div></div>
+  <div class="top-actions">
+    <a class="btn" href="bina.html">Bina Yonetimi</a>
+    <a class="btn" href="aidat.html">Aidat</a>
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2>Gider / Gelir</h2><p>Binanin kasa hareketlerini girin, bakiye otomatik hesaplanir.</p></div>
+  </div>
+  <div class="controls">
+    <label>Bina</label><select id="binaSec"></select>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="form-row">
+    <div class="f"><label>Tarih</label><input type="date" id="h_tarih"></div>
+    <div class="f"><label>Tur</label><select id="h_tur"><option value="gider">Gider</option><option value="gelir">Gelir</option></select></div>
+    <div class="f"><label>Kategori</label><input id="h_kategori" placeholder="Ornek: Temizlik" style="width:140px"></div>
+    <div class="f" style="flex:1;min-width:160px"><label>Aciklama</label><input id="h_aciklama" placeholder="Aciklama" style="width:100%"></div>
+    <div class="f"><label>Tutar (TL)</label><input type="number" id="h_tutar" min="0" placeholder="0" style="width:120px"></div>
+    <button class="btn gold" id="ekleBtn">+ Ekle</button>
+  </div>
+  <div id="tabloArea"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n)=> Number(n||0).toLocaleString('tr-TR');
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+$('h_tarih').value = new Date().toISOString().slice(0,10);
+
+async function loadBinalar(){
+  const { data:binalar } = await supabase.from('binalar').select('*').order('created_at');
+  const sel = $('binaSec');
+  if(!binalar || !binalar.length){ sel.innerHTML='<option>Bina yok</option>'; $('tabloArea').innerHTML='<div class="empty">Once Bina Yonetimi\'nden bina ekleyin.</div>'; return; }
+  sel.innerHTML = binalar.map(b=>'<option value="'+b.id+'">'+esc(b.ad)+'</option>').join('');
+  sel.onchange = loadTablo;
+  loadTablo();
+}
+
+async function loadTablo(){
+  const binaId = $('binaSec').value;
+  const area = $('tabloArea');
+  if(!binaId) return;
+  area.innerHTML = '<p style="color:var(--muted)">Yukleniyor...</p>';
+  const { data:hareketler } = await supabase.from('hareketler').select('*').eq('bina_id', binaId).order('tarih',{ascending:false});
+
+  let gelir=0, gider=0;
+  (hareketler||[]).forEach(h=>{ if(h.tur==='gelir') gelir+=Number(h.tutar||0); else gider+=Number(h.tutar||0); });
+  const kasa = gelir - gider;
+
+  $('summary').innerHTML =
+    '<div class="stat"><div class="lbl">Toplam Gelir</div><div class="val">'+fmt(gelir)+' TL</div></div>'+
+    '<div class="stat"><div class="lbl">Toplam Gider</div><div class="val">'+fmt(gider)+' TL</div></div>'+
+    '<div class="stat"><div class="lbl">Kasa Bakiyesi</div><div class="val">'+fmt(kasa)+' TL</div></div>';
+
+  if(!hareketler || !hareketler.length){ area.innerHTML='<div class="empty">Henuz hareket yok. Yukaridan gelir/gider ekleyin.</div>'; return; }
+
+  let rows = hareketler.map(h=>{
+    const isaret = h.tur==='gelir' ? '+' : '-';
+    return '<tr><td>'+esc(h.tarih)+'</td>'+
+      '<td><span class="tag '+h.tur+'">'+(h.tur==='gelir'?'Gelir':'Gider')+'</span></td>'+
+      '<td>'+(esc(h.kategori)||'-')+'</td>'+
+      '<td>'+(esc(h.aciklama)||'-')+'</td>'+
+      '<td class="tutar '+h.tur+'">'+isaret+fmt(h.tutar)+' TL</td>'+
+      '<td><button class="btn danger" data-del="'+h.id+'">Sil</button></td></tr>';
+  }).join('');
+  area.innerHTML = '<table><thead><tr><th>Tarih</th><th>Tur</th><th>Kategori</th><th>Aciklama</th><th>Tutar</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+  area.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('Hareket silinsin mi?')) return;
+      const { error } = await supabase.from('hareketler').delete().eq('id', btn.dataset.del);
+      if(error){ toast('Silinemedi'); return; }
+      toast('Silindi'); loadTablo();
+    };
+  });
+}
+
+$('ekleBtn').onclick = async ()=>{
+  const binaId = $('binaSec').value;
+  const tutar = Number($('h_tutar').value||0);
+  if(!binaId || binaId==='Bina yok'){ toast('Bina secin'); return; }
+  if(tutar<=0){ toast('Tutar girin'); return; }
+  const { error } = await supabase.from('hareketler').insert({
+    bina_id: binaId,
+    tarih: $('h_tarih').value || new Date().toISOString().slice(0,10),
+    tur: $('h_tur').value,
+    kategori: $('h_kategori').value.trim()||null,
+    aciklama: $('h_aciklama').value.trim()||null,
+    tutar: tutar
+  });
+  if(error){ toast('Hata: '+error.message); return; }
+  $('h_kategori').value=''; $('h_aciklama').value=''; $('h_tutar').value='';
+  toast('Eklendi'); loadTablo();
+};
+
+loadBinalar();
+</script>
+</body>
+</html>
