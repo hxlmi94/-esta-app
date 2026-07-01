@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Kontrat & Ödeme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88;--green-soft:#9fd58a;--red-soft:#e0a0a0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 16px;border-radius:8px;transition:.18s}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:6px 12px;font-size:12px}
+  .btn.danger:hover{background:#3a1416;color:#ffb3b3}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .uyari{background:linear-gradient(180deg,#2a1416,#1c0f10);border:1px solid #5a2f2f;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:14px;color:var(--red-soft)}
+  .uyari b{color:#ffb3b3}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .card.yakin::before{background:linear-gradient(180deg,#e0a0a0,#7b1f2b)}
+  .card h3{font-size:22px;margin-bottom:6px}
+  .card .line{font-size:13px;color:var(--muted);margin-bottom:3px}
+  .card .line b{color:var(--text);font-weight:500}
+  .badge{font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-bottom:8px}
+  .b-aktif{background:#1c3320;color:var(--green-soft)}
+  .b-bitti{background:#333;color:#bbb}
+  .b-yakin{background:#3a1c1c;color:var(--red-soft)}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+  .empty{text-align:center;color:var(--muted);padding:56px 20px;border:1px dashed var(--line);border-radius:14px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:linear-gradient(180deg,#201719,#16100f);border:1px solid var(--line);border-radius:16px;width:100%;max-width:540px;padding:28px;max-height:90vh;overflow:auto}
+  .modal h3{font-size:26px;color:var(--gold);margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Kontrat & Ödeme</div></div>
+  <div class="top-actions">
+    <a class="btn" href="projeler.html">Projeler</a>
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2>Kontrat & Ödeme</h2><p>Kira/sözleşme takibi. Esta yaklaşan bitiş ve ödemeleri buradan bilir.</p></div>
+    <button class="btn gold" id="ekleBtn">+ Kontrat Ekle</button>
+  </div>
+  <div id="uyariArea"></div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<div class="overlay" id="modal"><div class="modal">
+  <h3 id="modalBaslik">Yeni Kontrat</h3>
+  <input type="hidden" id="m_id">
+  <div class="field"><label>Başlık *</label><input id="k_baslik" placeholder="Örn: Şişli ofis kirası"></div>
+  <div class="two">
+    <div class="field"><label>Kişi</label><input id="k_kisi" placeholder="Kiracı/karşı taraf"></div>
+    <div class="field"><label>Tür</label><select id="k_tur"><option value="kira">Kira</option><option value="satis">Satış</option><option value="hizmet">Hizmet</option><option value="diger">Diğer</option></select></div>
+  </div>
+  <div class="two">
+    <div class="field"><label>Tutar (TL)</label><input type="number" id="k_tutar" min="0" placeholder="0"></div>
+    <div class="field"><label>Aylık Ödeme Günü</label><input type="number" id="k_odemegunu" min="1" max="31" placeholder="Örn: 5"></div>
+  </div>
+  <div class="two">
+    <div class="field"><label>Başlangıç</label><input type="date" id="k_bas"></div>
+    <div class="field"><label>Bitiş</label><input type="date" id="k_bit"></div>
+  </div>
+  <div class="field"><label>Durum</label><select id="k_durum"><option value="aktif">Aktif</option><option value="bitti">Bitti</option></select></div>
+  <div class="field"><label>Not</label><textarea id="k_not" rows="2"></textarea></div>
+  <div class="modal-actions"><button class="btn" data-close>Vazgeç</button><button class="btn gold" id="kaydet">Kaydet</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n)=> Number(n||0).toLocaleString('tr-TR');
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function openModal(){ $('modal').classList.add('open'); }
+function closeModal(){ $('modal').classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+
+function gunFarki(t){ if(!t) return null; return Math.ceil((new Date(t)-new Date())/86400000); }
+
+async function load(){
+  const grid=$('grid'); grid.innerHTML='<p style="color:var(--muted)">Yükleniyor...</p>';
+  const { data:ks, error } = await supabase.from('kontratlar').select('*').order('bitis',{ascending:true,nullsFirst:false});
+  if(error){ grid.innerHTML='<p style="color:#e08f8f">Hata: '+esc(error.message)+'</p>'; return; }
+  if(!ks||!ks.length){ grid.innerHTML='<div class="empty">Henüz kontrat yok. <b>+ Kontrat Ekle</b> ile başlayın.</div>'; $('uyariArea').innerHTML=''; return; }
+
+  const yakinlar = ks.filter(k=>k.durum==='aktif' && k.bitis && gunFarki(k.bitis)!==null && gunFarki(k.bitis)>=0 && gunFarki(k.bitis)<=45);
+  $('uyariArea').innerHTML = yakinlar.length
+    ? '<div class="uyari">⚠️ <b>'+yakinlar.length+' kontrat</b> 45 gün içinde bitiyor: '+yakinlar.map(k=>esc(k.baslik)+' ('+gunFarki(k.bitis)+' gün)').join(', ')+'</div>'
+    : '';
+
+  grid.innerHTML='';
+  ks.forEach(k=>{
+    const g = gunFarki(k.bitis);
+    const yakin = k.durum==='aktif' && g!==null && g>=0 && g<=45;
+    const c=document.createElement('div'); c.className='card'+(yakin?' yakin':'');
+    let badge = k.durum==='bitti' ? '<span class="badge b-bitti">Bitti</span>' : (yakin?'<span class="badge b-yakin">'+g+' gün kaldı</span>':'<span class="badge b-aktif">Aktif</span>');
+    const bitisTxt = k.bitis ? new Date(k.bitis).toLocaleDateString('tr-TR') : '-';
+    const basTxt = k.baslangic ? new Date(k.baslangic).toLocaleDateString('tr-TR') : '-';
+    c.innerHTML = badge+'<h3>'+esc(k.baslik)+'</h3>'+
+      (k.kisi?'<div class="line">Kişi: <b>'+esc(k.kisi)+'</b></div>':'')+
+      (k.tutar?'<div class="line">Tutar: <b>'+fmt(k.tutar)+' TL</b></div>':'')+
+      (k.odeme_gunu?'<div class="line">Ödeme günü: <b>her ayın '+k.odeme_gunu+'\'i</b></div>':'')+
+      '<div class="line">Süre: <b>'+basTxt+' → '+bitisTxt+'</b></div>'+
+      (k.not_?'<div class="line" style="margin-top:6px">'+esc(k.not_)+'</div>':'')+
+      '<div class="row"><button class="btn" data-edit="'+k.id+'" style="padding:6px 14px;font-size:12px">Düzenle</button><button class="btn danger" data-del="'+k.id+'">Sil</button></div>';
+    c.querySelector('[data-del]').onclick=async()=>{ if(!confirm('Silinsin mi?'))return; await supabase.from('kontratlar').delete().eq('id',k.id); toast('Silindi'); load(); };
+    c.querySelector('[data-edit]').onclick=()=>duzenle(k);
+    grid.appendChild(c);
+  });
+}
+
+function temizle(){ ['k_baslik','k_kisi','k_tutar','k_odemegunu','k_bas','k_bit','k_not'].forEach(x=>$(x).value=''); $('k_tur').value='kira'; $('k_durum').value='aktif'; }
+$('ekleBtn').onclick=()=>{ $('m_id').value=''; temizle(); $('modalBaslik').textContent='Yeni Kontrat'; openModal(); };
+function duzenle(k){ $('m_id').value=k.id; $('k_baslik').value=k.baslik||''; $('k_kisi').value=k.kisi||''; $('k_tur').value=k.tur||'kira'; $('k_tutar').value=k.tutar||''; $('k_odemegunu').value=k.odeme_gunu||''; $('k_bas').value=k.baslangic||''; $('k_bit').value=k.bitis||''; $('k_durum').value=k.durum||'aktif'; $('k_not').value=k.not_||''; $('modalBaslik').textContent='Kontratı Düzenle'; openModal(); }
+
+$('kaydet').onclick=async()=>{
+  const baslik=$('k_baslik').value.trim(); if(!baslik){ toast('Başlık zorunlu'); return; }
+  const payload={ baslik, kisi:$('k_kisi').value.trim()||null, tur:$('k_tur').value, tutar:Number($('k_tutar').value||0),
+    odeme_gunu:$('k_odemegunu').value?Number($('k_odemegunu').value):null,
+    baslangic:$('k_bas').value||null, bitis:$('k_bit').value||null, durum:$('k_durum').value, not_:$('k_not').value.trim()||null };
+  const id=$('m_id').value; let error;
+  if(id) ({error}=await supabase.from('kontratlar').update(payload).eq('id',id)); else ({error}=await supabase.from('kontratlar').insert(payload));
+  if(error){ toast('Hata: '+error.message); return; }
+  closeModal(); toast(id?'Güncellendi':'Eklendi'); load();
+};
+
+load();
+</script>
+</body>
+</html>
