@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Projeler & Kişiler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 16px;border-radius:8px;transition:.18s}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:6px 12px;font-size:12px}
+  .btn.danger:hover{background:#3a1416;color:#ffb3b3}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .tabs{display:flex;gap:8px;margin-bottom:18px}
+  .tab{padding:10px 20px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:14px;color:var(--muted)}
+  .tab.active{background:linear-gradient(180deg,var(--wine-soft),var(--wine));color:#fff;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .card h3{font-size:22px;margin-bottom:6px}
+  .card .line{font-size:13px;color:var(--muted);margin-bottom:3px}
+  .card .line b{color:var(--text);font-weight:500}
+  .card .acik{font-size:13px;color:var(--muted);margin-top:8px;white-space:pre-wrap}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+  .badge{font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-bottom:8px}
+  .as-basladi{background:#1f2c3a;color:#8ab6e0}
+  .as-devam{background:#3a3320;color:#d6c27a}
+  .as-bitti{background:#1c3320;color:#9fd58a}
+  .rol{background:#2a1f2e;color:#d0a8d8;font-size:11px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px}
+  .empty{text-align:center;color:var(--muted);padding:56px 20px;border:1px dashed var(--line);border-radius:14px}
+  .yakin{color:#e0a0a0;font-weight:500}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:linear-gradient(180deg,#201719,#16100f);border:1px solid var(--line);border-radius:16px;width:100%;max-width:540px;padding:28px;max-height:90vh;overflow:auto}
+  .modal h3{font-size:26px;color:var(--gold);margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .hidden{display:none}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Projeler & Kişiler</div></div>
+  <div class="top-actions">
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2 id="baslik">Projeler</h2><p id="altbaslik">Hangi proje ne aşamada, kimin elinde, ne zaman bitecek.</p></div>
+    <button class="btn gold" id="ekleBtn">+ Ekle</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="proje">Projeler</div>
+    <div class="tab" data-tab="kisi">Kişiler</div>
+  </div>
+  <div id="area" class="grid"></div>
+</div>
+
+<div class="overlay" id="modal"><div class="modal">
+  <h3 id="modalBaslik">Yeni</h3>
+  <input type="hidden" id="m_id">
+  <div id="projeForm">
+    <div class="field"><label>Proje Adı *</label><input id="p_ad" placeholder="Örn: Zeytinkule Sitesi"></div>
+    <div class="two">
+      <div class="field"><label>Aşama</label><select id="p_asama"><option value="basladi">Başladı</option><option value="devam">Devam ediyor</option><option value="bitti">Bitti</option></select></div>
+      <div class="field"><label>Sorumlu</label><input id="p_sorumlu" placeholder="Kim ilgileniyor"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Konum</label><input id="p_konum" placeholder="Semt / adres"></div>
+      <div class="field"><label>Bitiş Tarihi</label><input type="date" id="p_bitis"></div>
+    </div>
+    <div class="field"><label>Açıklama</label><textarea id="p_aciklama" rows="2"></textarea></div>
+  </div>
+  <div id="kisiForm" class="hidden">
+    <div class="field"><label>Ad Soyad *</label><input id="k_ad" placeholder="Örn: Ahmet Yılmaz"></div>
+    <div class="two">
+      <div class="field"><label>Rol</label><select id="k_rol"><option value="musteri">Müşteri</option><option value="kiraci">Kiracı</option><option value="malik">Malik</option><option value="tedarikci">Tedarikçi</option><option value="diger">Diğer</option></select></div>
+      <div class="field"><label>Telefon</label><input id="k_tel" placeholder="05.."></div>
+    </div>
+    <div class="field"><label>E-posta</label><input id="k_mail" placeholder="ornek@mail.com"></div>
+    <div class="field"><label>Not</label><textarea id="k_not" rows="2" placeholder="Ne arıyor, bütçe, vb."></textarea></div>
+  </div>
+  <div class="modal-actions"><button class="btn" data-close>Vazgeç</button><button class="btn gold" id="kaydet">Kaydet</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function openModal(){ $('modal').classList.add('open'); }
+function closeModal(){ $('modal').classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+
+let tab='proje';
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); tab=t.dataset.tab;
+    $('baslik').textContent = tab==='proje'?'Projeler':'Kişiler';
+    $('altbaslik').textContent = tab==='proje'?'Hangi proje ne aşamada, kimin elinde, ne zaman bitecek.':'Müşteri, kiracı, malik ve tedarikçi kayıtları.';
+    load();
+  };
+});
+
+const asamaBadge=(a)=> a==='bitti'?'<span class="badge as-bitti">Bitti</span>':a==='devam'?'<span class="badge as-devam">Devam ediyor</span>':'<span class="badge as-basladi">Başladı</span>';
+const rolAd={musteri:'Müşteri',kiraci:'Kiracı',malik:'Malik',tedarikci:'Tedarikçi',diger:'Diğer'};
+
+function gunFarki(tarih){ if(!tarih) return null; const d=Math.ceil((new Date(tarih)-new Date())/86400000); return d; }
+
+async function load(){
+  const area=$('area'); area.innerHTML='<p style="color:var(--muted)">Yükleniyor...</p>';
+  if(tab==='proje'){
+    const { data:projeler } = await supabase.from('projeler').select('*').order('created_at',{ascending:false});
+    if(!projeler||!projeler.length){ area.innerHTML='<div class="empty">Henüz proje yok. <b>+ Ekle</b> ile başlayın.</div>'; return; }
+    area.innerHTML='';
+    projeler.forEach(p=>{
+      const g=gunFarki(p.bitis_tarihi);
+      const bitisTxt = p.bitis_tarihi ? (new Date(p.bitis_tarihi).toLocaleDateString('tr-TR') + (g!==null && g>=0 && g<=30 ? ' <span class="yakin">('+g+' gün kaldı)</span>' : (g!==null && g<0 ? ' <span class="yakin">(geçti)</span>':''))) : '-';
+      const c=document.createElement('div'); c.className='card';
+      c.innerHTML = asamaBadge(p.asama)+'<h3>'+esc(p.ad)+'</h3>'+
+        (p.sorumlu?'<div class="line">Sorumlu: <b>'+esc(p.sorumlu)+'</b></div>':'')+
+        (p.konum?'<div class="line">Konum: <b>'+esc(p.konum)+'</b></div>':'')+
+        '<div class="line">Bitiş: <b>'+bitisTxt+'</b></div>'+
+        (p.aciklama?'<div class="acik">'+esc(p.aciklama)+'</div>':'')+
+        '<div class="row"><button class="btn" data-edit="'+p.id+'" style="padding:6px 14px;font-size:12px">Düzenle</button><button class="btn danger" data-del="'+p.id+'">Sil</button></div>';
+      c.querySelector('[data-del]').onclick=async()=>{ if(!confirm('Silinsin mi?'))return; await supabase.from('projeler').delete().eq('id',p.id); toast('Silindi'); load(); };
+      c.querySelector('[data-edit]').onclick=()=>duzenleProje(p);
+      area.appendChild(c);
+    });
+  } else {
+    const { data:kisiler } = await supabase.from('kisiler').select('*').order('created_at',{ascending:false});
+    if(!kisiler||!kisiler.length){ area.innerHTML='<div class="empty">Henüz kişi yok. <b>+ Ekle</b> ile başlayın.</div>'; return; }
+    area.innerHTML='';
+    kisiler.forEach(k=>{
+      const c=document.createElement('div'); c.className='card';
+      c.innerHTML = '<span class="rol">'+(rolAd[k.rol]||k.rol)+'</span><h3>'+esc(k.ad)+'</h3>'+
+        (k.telefon?'<div class="line">Tel: <b>'+esc(k.telefon)+'</b></div>':'')+
+        (k.eposta?'<div class="line">Mail: <b>'+esc(k.eposta)+'</b></div>':'')+
+        (k.not_?'<div class="acik">'+esc(k.not_)+'</div>':'')+
+        '<div class="row"><button class="btn" data-edit="'+k.id+'" style="padding:6px 14px;font-size:12px">Düzenle</button><button class="btn danger" data-del="'+k.id+'">Sil</button></div>';
+      c.querySelector('[data-del]').onclick=async()=>{ if(!confirm('Silinsin mi?'))return; await supabase.from('kisiler').delete().eq('id',k.id); toast('Silindi'); load(); };
+      c.querySelector('[data-edit]').onclick=()=>duzenleKisi(k);
+      area.appendChild(c);
+    });
+  }
+}
+
+function formToggle(){ $('projeForm').classList.toggle('hidden', tab!=='proje'); $('kisiForm').classList.toggle('hidden', tab==='proje'); }
+function temizleProje(){ ['p_ad','p_sorumlu','p_konum','p_bitis','p_aciklama'].forEach(x=>$(x).value=''); $('p_asama').value='basladi'; }
+function temizleKisi(){ ['k_ad','k_tel','k_mail','k_not'].forEach(x=>$(x).value=''); $('k_rol').value='musteri'; }
+
+$('ekleBtn').onclick=()=>{ $('m_id').value=''; formToggle(); if(tab==='proje'){temizleProje();$('modalBaslik').textContent='Yeni Proje';}else{temizleKisi();$('modalBaslik').textContent='Yeni Kişi';} openModal(); };
+function duzenleProje(p){ tab='proje'; formToggle(); $('m_id').value=p.id; $('p_ad').value=p.ad||''; $('p_asama').value=p.asama||'basladi'; $('p_sorumlu').value=p.sorumlu||''; $('p_konum').value=p.konum||''; $('p_bitis').value=p.bitis_tarihi||''; $('p_aciklama').value=p.aciklama||''; $('modalBaslik').textContent='Projeyi Düzenle'; openModal(); }
+function duzenleKisi(k){ tab='kisi'; formToggle(); $('m_id').value=k.id; $('k_ad').value=k.ad||''; $('k_rol').value=k.rol||'musteri'; $('k_tel').value=k.telefon||''; $('k_mail').value=k.eposta||''; $('k_not').value=k.not_||''; $('modalBaslik').textContent='Kişiyi Düzenle'; openModal(); }
+
+$('kaydet').onclick=async()=>{
+  const id=$('m_id').value; let error;
+  if(tab==='proje'){
+    const ad=$('p_ad').value.trim(); if(!ad){ toast('Proje adı zorunlu'); return; }
+    const payload={ ad, asama:$('p_asama').value, sorumlu:$('p_sorumlu').value.trim()||null, konum:$('p_konum').value.trim()||null, bitis_tarihi:$('p_bitis').value||null, aciklama:$('p_aciklama').value.trim()||null };
+    if(id) ({error}=await supabase.from('projeler').update(payload).eq('id',id)); else ({error}=await supabase.from('projeler').insert(payload));
+  } else {
+    const ad=$('k_ad').value.trim(); if(!ad){ toast('Ad zorunlu'); return; }
+    const payload={ ad, rol:$('k_rol').value, telefon:$('k_tel').value.trim()||null, eposta:$('k_mail').value.trim()||null, not_:$('k_not').value.trim()||null };
+    if(id) ({error}=await supabase.from('kisiler').update(payload).eq('id',id)); else ({error}=await supabase.from('kisiler').insert(payload));
+  }
+  if(error){ toast('Hata: '+error.message); return; }
+  closeModal(); toast(id?'Güncellendi':'Eklendi'); load();
+};
+
+load();
+</script>
+</body>
+</html>
