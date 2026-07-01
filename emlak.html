@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Emlak İlanları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88;--green-soft:#9fd58a;--blue-soft:#8ab6e0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.5px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:9px 16px;border-radius:8px;transition:.18s}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.gold:hover{filter:brightness(1.08)}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:6px 12px;font-size:12px}
+  .btn.danger:hover{background:#3a1416;color:#ffb3b3}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .head-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+  .head-row h2{font-size:34px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:4px}
+  .filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .chip{padding:8px 16px;border:1px solid var(--line);border-radius:20px;cursor:pointer;font-size:13px;color:var(--muted)}
+  .chip.active{background:linear-gradient(180deg,var(--wine-soft),var(--wine));color:#fff;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:.2s}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .card:hover{border-color:var(--gold)}
+  .card .tip{font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.5px;display:inline-block;margin-bottom:8px}
+  .tip.satilik{background:#1c3320;color:var(--green-soft)}
+  .tip.kiralik{background:#1f2c3a;color:var(--blue-soft)}
+  .card h3{font-size:23px;margin-bottom:4px}
+  .card .fiyat{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold-soft);margin:6px 0}
+  .card .detay{font-size:13px;color:var(--muted);margin-bottom:4px}
+  .card .konum{font-size:13px;color:var(--text)}
+  .card .acik{font-size:13px;color:var(--muted);margin-top:8px;white-space:pre-wrap}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+  .card.pasif{opacity:.55}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;border:1px dashed var(--line);border-radius:14px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:linear-gradient(180deg,#201719,#16100f);border:1px solid var(--line);border-radius:16px;width:100%;max-width:560px;padding:28px;max-height:90vh;overflow:auto}
+  .modal h3{font-size:26px;color:var(--gold);margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:60}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Emlak</div></div>
+  <div class="top-actions">
+    <a class="btn" href="bina.html">Bina</a>
+    <a class="btn" href="panel.html">&larr; Panel</a>
+    <button class="btn" id="logoutBtn">Cikis</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2>Emlak İlanları</h2><p>Satılık ve kiralık portföyünüzü yönetin.</p></div>
+    <button class="btn gold" id="ekleBtn">+ İlan Ekle</button>
+  </div>
+  <div class="filters">
+    <div class="chip active" data-f="hepsi">Hepsi</div>
+    <div class="chip" data-f="satilik">Satılık</div>
+    <div class="chip" data-f="kiralik">Kiralık</div>
+  </div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3 id="modalBaslik">Yeni İlan</h3>
+    <input type="hidden" id="i_id">
+    <div class="field"><label>Başlık *</label><input id="i_baslik" placeholder="Örn: Merkezde 3+1 daire"></div>
+    <div class="two">
+      <div class="field"><label>Tür</label><select id="i_tip"><option value="satilik">Satılık</option><option value="kiralik">Kiralık</option></select></div>
+      <div class="field"><label>Durum</label><select id="i_durum"><option value="aktif">Aktif</option><option value="pasif">Pasif (satıldı/kiralandı)</option></select></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Fiyat (TL)</label><input type="number" id="i_fiyat" min="0" placeholder="0"></div>
+      <div class="field"><label>m²</label><input type="number" id="i_m2" min="0" placeholder="0"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Oda</label><input id="i_oda" placeholder="Örn: 3+1"></div>
+      <div class="field"><label>Konum</label><input id="i_konum" placeholder="Mahalle / semt"></div>
+    </div>
+    <div class="field"><label>Açıklama</label><textarea id="i_aciklama" rows="3" placeholder="Detaylar..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" data-close>Vazgeç</button>
+      <button class="btn gold" id="kaydet">Kaydet</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n)=> Number(n||0).toLocaleString('tr-TR');
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function openModal(){ $('modal').classList.add('open'); }
+function closeModal(){ $('modal').classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+$('logoutBtn').onclick = async ()=>{ await supabase.auth.signOut(); location.href='login.html'; };
+
+let filtre = 'hepsi';
+document.querySelectorAll('.chip').forEach(c=>{
+  c.onclick = ()=>{ document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); filtre=c.dataset.f; load(); };
+});
+
+async function load(){
+  const grid = $('grid');
+  grid.innerHTML = '<p style="color:var(--muted)">Yükleniyor...</p>';
+  let q = supabase.from('ilanlar').select('*').order('created_at',{ascending:false});
+  if(filtre!=='hepsi') q = q.eq('tip', filtre);
+  const { data:ilanlar, error } = await q;
+  if(error){ grid.innerHTML='<p style="color:#e08f8f">Hata: '+esc(error.message)+'</p>'; return; }
+  if(!ilanlar || !ilanlar.length){ grid.innerHTML='<div class="empty">Henüz ilan yok. Sağ üstten <b>İlan Ekle</b> ile başlayın.</div>'; return; }
+  grid.innerHTML='';
+  ilanlar.forEach(i=>{
+    const c=document.createElement('div');
+    c.className='card'+(i.durum==='pasif'?' pasif':'');
+    const detay=[i.oda?esc(i.oda):null, i.metrekare?fmt(i.metrekare)+' m²':null].filter(Boolean).join(' · ');
+    c.innerHTML =
+      '<span class="tip '+i.tip+'">'+(i.tip==='satilik'?'Satılık':'Kiralık')+(i.durum==='pasif'?' · Pasif':'')+'</span>'+
+      '<h3>'+esc(i.baslik)+'</h3>'+
+      '<div class="fiyat">'+fmt(i.fiyat)+' TL</div>'+
+      (detay?'<div class="detay">'+detay+'</div>':'')+
+      (i.konum?'<div class="konum">'+esc(i.konum)+'</div>':'')+
+      (i.aciklama?'<div class="acik">'+esc(i.aciklama)+'</div>':'')+
+      '<div class="row"><button class="btn" data-edit="'+i.id+'" style="padding:6px 14px;font-size:12px">Düzenle</button>'+
+      '<button class="btn danger" data-del="'+i.id+'">Sil</button></div>';
+    c.querySelector('[data-del]').onclick=async()=>{
+      if(!confirm('İlan silinsin mi?')) return;
+      await supabase.from('ilanlar').delete().eq('id',i.id); toast('Silindi'); load();
+    };
+    c.querySelector('[data-edit]').onclick=()=>duzenle(i);
+    grid.appendChild(c);
+  });
+}
+
+function temizle(){ ['i_baslik','i_fiyat','i_m2','i_oda','i_konum','i_aciklama'].forEach(x=>$(x).value=''); $('i_id').value=''; $('i_tip').value='satilik'; $('i_durum').value='aktif'; }
+$('ekleBtn').onclick=()=>{ temizle(); $('modalBaslik').textContent='Yeni İlan'; openModal(); };
+function duzenle(i){
+  $('i_id').value=i.id; $('i_baslik').value=i.baslik||''; $('i_tip').value=i.tip||'satilik';
+  $('i_durum').value=i.durum||'aktif'; $('i_fiyat').value=i.fiyat||''; $('i_m2').value=i.metrekare||'';
+  $('i_oda').value=i.oda||''; $('i_konum').value=i.konum||''; $('i_aciklama').value=i.aciklama||'';
+  $('modalBaslik').textContent='İlanı Düzenle'; openModal();
+}
+
+$('kaydet').onclick=async()=>{
+  const baslik=$('i_baslik').value.trim();
+  if(!baslik){ toast('Başlık zorunlu'); return; }
+  const payload={
+    baslik, tip:$('i_tip').value, durum:$('i_durum').value,
+    fiyat:Number($('i_fiyat').value||0),
+    metrekare:$('i_m2').value?Number($('i_m2').value):null,
+    oda:$('i_oda').value.trim()||null,
+    konum:$('i_konum').value.trim()||null,
+    aciklama:$('i_aciklama').value.trim()||null
+  };
+  const id=$('i_id').value;
+  let error;
+  if(id){ ({error}=await supabase.from('ilanlar').update(payload).eq('id',id)); }
+  else { ({error}=await supabase.from('ilanlar').insert(payload)); }
+  if(error){ toast('Hata: '+error.message); return; }
+  closeModal(); toast(id?'Güncellendi':'İlan eklendi'); load();
+};
+
+load();
+</script>
+</body>
+</html>
