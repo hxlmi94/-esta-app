@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Haritam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;height:100vh;display:flex;flex-direction:column}
+  a{color:inherit;text-decoration:none}
+  .logo{font-family:'Cormorant Garamond',serif}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .logo{font-size:26px;color:var(--gold);letter-spacing:3px}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:8px 14px;border-radius:8px}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .legend{display:flex;gap:16px;padding:10px 24px;font-size:13px;border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .legend span{display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .dot.proje{background:#e0554e}
+  .dot.satilik{background:#4caf6a}
+  .dot.kiralik{background:#4a8fd0}
+  .addbar{margin-left:auto;display:flex;gap:8px}
+  #map{flex:1}
+  .leaflet-popup-content{font-family:'Jost',sans-serif}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:linear-gradient(180deg,#201719,#16100f);border:1px solid var(--line);border-radius:16px;width:100%;max-width:460px;padding:26px}
+  .modal h3{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);margin-bottom:16px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .field input,.field select{width:100%;background:#0f0b0c;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none;z-index:1100}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">ESTA</div><div class="sub">Haritam</div></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn gold" id="ekleBtn">+ Konum Ekle</button>
+    <a class="btn" href="panel.html">← Panel</a>
+  </div>
+</header>
+<div class="legend">
+  <span><span class="dot proje"></span>İnşaat / Proje</span>
+  <span><span class="dot satilik"></span>Satılık</span>
+  <span><span class="dot kiralik"></span>Kiralık</span>
+  <span id="durum" style="margin-left:auto;color:var(--muted)"></span>
+</div>
+<div id="map"></div>
+
+<div class="overlay" id="modal"><div class="modal">
+  <h3>Konum Ekle</h3>
+  <div class="field"><label>Tür</label><select id="k_tur">
+    <option value="proje">İnşaat / Proje</option>
+    <option value="satilik">Satılık İlan</option>
+    <option value="kiralik">Kiralık İlan</option>
+  </select></div>
+  <div class="field"><label>Başlık *</label><input id="k_baslik" placeholder="Örn: Zeytinkule inşaatı"></div>
+  <div class="field"><label>Adres / Semt *</label><input id="k_adres" placeholder="Örn: Esenyurt, İstanbul"></div>
+  <div class="field"><label>Not</label><input id="k_not" placeholder="İstege bağlı"></div>
+  <div class="modal-actions">
+    <button class="btn" id="kapat">Vazgeç</button>
+    <button class="btn gold" id="kaydet">Haritaya Ekle</button>
+  </div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+
+const map = L.map('map').setView([41.0082, 28.9784], 11); // İstanbul
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap', maxZoom:19 }).addTo(map);
+
+const renk = { proje:'#e0554e', satilik:'#4caf6a', kiralik:'#4a8fd0' };
+function pin(tur){ return L.divIcon({ className:'', html:'<div style="width:18px;height:18px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+renk[tur]+';border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.5)"></div>', iconSize:[18,18], iconAnchor:[9,18] }); }
+
+let markers = [];
+async function yukle(){
+  markers.forEach(m=>map.removeLayer(m)); markers=[];
+  const [proje, ilan] = await Promise.all([
+    supabase.from('projeler').select('*').not('lat','is',null),
+    supabase.from('ilanlar').select('*').not('lat','is',null)
+  ]);
+  const noktalar = [];
+  (proje.data||[]).forEach(p=> noktalar.push({tur:'proje', baslik:p.ad, alt:p.konum||p.asama, lat:p.lat, lng:p.lng}));
+  (ilan.data||[]).forEach(i=> noktalar.push({tur:(i.tip==='kiralik'?'kiralik':'satilik'), baslik:i.baslik, alt:(i.fiyat?Number(i.fiyat).toLocaleString('tr-TR')+' TL':'')+' '+(i.konum||''), lat:i.lat, lng:i.lng}));
+
+  noktalar.forEach(n=>{
+    const m = L.marker([n.lat,n.lng],{icon:pin(n.tur)}).addTo(map);
+    m.bindPopup('<b>'+n.baslik+'</b><br>'+(n.alt||''));
+    markers.push(m);
+  });
+  $('durum').textContent = noktalar.length+' konum';
+  if(noktalar.length){ const g=L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.2)); }
+}
+
+// adres → koordinat (OpenStreetMap Nominatim, bedava)
+async function adresBul(adres){
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(adres));
+  const d = await r.json();
+  if(d && d.length) return { lat:parseFloat(d[0].lat), lng:parseFloat(d[0].lon) };
+  return null;
+}
+
+$('ekleBtn').onclick=()=>{ ['k_baslik','k_adres','k_not'].forEach(x=>$(x).value=''); $('k_tur').value='proje'; $('modal').classList.add('open'); };
+$('kapat').onclick=()=>$('modal').classList.remove('open');
+
+$('kaydet').onclick=async()=>{
+  const baslik=$('k_baslik').value.trim(), adres=$('k_adres').value.trim();
+  if(!baslik||!adres){ toast('Başlık ve adres gerekli'); return; }
+  toast('Konum bulunuyor...');
+  const koord = await adresBul(adres);
+  if(!koord){ toast('Adres bulunamadı, daha açık yaz'); return; }
+  const tur = $('k_tur').value;
+  let error;
+  if(tur==='proje'){
+    ({error} = await supabase.from('projeler').insert({ ad:baslik, konum:adres, aciklama:$('k_not').value.trim()||null, asama:'devam', lat:koord.lat, lng:koord.lng }));
+  } else {
+    ({error} = await supabase.from('ilanlar').insert({ baslik, konum:adres, tip:tur, aciklama:$('k_not').value.trim()||null, durum:'aktif', lat:koord.lat, lng:koord.lng }));
+  }
+  if(error){ toast('Hata: '+error.message); return; }
+  $('modal').classList.remove('open'); toast('Haritaya eklendi'); yukle();
+};
+
+yukle();
+</script>
+</body>
+</html>
