@@ -90,11 +90,29 @@ function ekle(kim, metin, think){
   return d;
 }
 
+function sesMetni(metin){
+  return metin
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/[*#_`>|~^]/g, ' ')
+    .replace(/^[\s]*[-•]\s*/gm, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/https?:\/\/\S+/g, 'bağlantı')
+    .replace(/(\d)\.(?=\s)/g, '$1 ')
+    .replace(/₺/g, ' lira ')
+    .replace(/\bTL\b/g, ' lira')
+    .replace(/&/g, ' ve ')
+    .replace(/\s+/g, ' ')
+    .replace(/\s([,.!?:;])/g, '$1')
+    .trim();
+}
+
 async function seslendir(metin){
   if(!sesAcik) return;
+  const temiz = sesMetni(metin);
+  if(!temiz) return;
   try{
     if(sonSes){ sonSes.pause(); sonSes=null; }
-    const r = await fetch(SERVER+'/ses', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ metin }) });
+    const r = await fetch(SERVER+'/ses', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ metin: temiz }) });
     if(!r.ok) throw new Error('ses alinamadi');
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
@@ -103,7 +121,7 @@ async function seslendir(metin){
   }catch(err){
     if('speechSynthesis' in window){
       speechSynthesis.cancel();
-      const u=new SpeechSynthesisUtterance(metin);
+      const u=new SpeechSynthesisUtterance(temiz);
       u.lang='tr-TR'; speechSynthesis.speak(u);
     }
   }
