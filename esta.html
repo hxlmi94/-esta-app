@@ -71,6 +71,7 @@
 const SERVER = 'https://esta-server.onrender.com';
 const $ = (id)=>document.getElementById(id);
 let sesAcik = true;
+let sonSes = null;
 
 const chat=$('chat'), input=$('input');
 input.addEventListener('input', ()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; });
@@ -78,7 +79,7 @@ input.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preve
 $('send').onclick=gonder;
 document.querySelectorAll('.oneri .o').forEach(o=>o.onclick=()=>{ input.value=o.textContent; gonder(); });
 
-$('sesToggle').onclick=()=>{ sesAcik=!sesAcik; $('sesToggle').textContent = sesAcik?'🔊 Ses: Açık':'🔇 Ses: Kapalı'; if(!sesAcik) speechSynthesis.cancel(); };
+$('sesToggle').onclick=()=>{ sesAcik=!sesAcik; $('sesToggle').textContent = sesAcik?'🔊 Ses: Açık':'🔇 Ses: Kapalı'; if(!sesAcik){ if(sonSes){sonSes.pause();sonSes=null;} if('speechSynthesis' in window) speechSynthesis.cancel(); } };
 
 function ekle(kim, metin, think){
   const k=$('karsilama'); if(k) k.remove();
@@ -89,12 +90,23 @@ function ekle(kim, metin, think){
   return d;
 }
 
-function seslendir(metin){
-  if(!sesAcik || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(metin);
-  u.lang='tr-TR'; u.rate=1.05;
-  speechSynthesis.speak(u);
+async function seslendir(metin){
+  if(!sesAcik) return;
+  try{
+    if(sonSes){ sonSes.pause(); sonSes=null; }
+    const r = await fetch(SERVER+'/ses', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ metin }) });
+    if(!r.ok) throw new Error('ses alinamadi');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    sonSes = new Audio(url);
+    sonSes.play();
+  }catch(err){
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(metin);
+      u.lang='tr-TR'; speechSynthesis.speak(u);
+    }
+  }
 }
 
 async function gonder(){
@@ -116,7 +128,6 @@ async function gonder(){
   }finally{ $('send').disabled=false; }
 }
 
-// Sesli giriş (mikrofon)
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if(SR){
   const rec=new SR(); rec.lang='tr-TR'; rec.interimResults=false;
