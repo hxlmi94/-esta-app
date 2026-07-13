@@ -82,11 +82,11 @@
 <div class="chat" id="chat">
   <div class="karsilama" id="karsilama">
     <div class="logo">Esta</div>
-    <div>Merhaba Halime. Sohbet edebiliriz, işini sorabilirsin, ya da bir belge/fatura gönder — okuyayım.</div>
+    <div>Merhaba Halime.</div>
     <div class="oneri">
-      <div class="o">Bugün ne yapmalıyım?</div>
-      <div class="o">Kasada durum ne?</div>
       <div class="o">Nasılsın?</div>
+      <div class="o">Canım sıkkın</div>
+      <div class="o">Bugün ne yapmalıyım?</div>
     </div>
   </div>
 </div>
@@ -113,6 +113,7 @@ const $ = (id)=>document.getElementById(id);
 let sesAcik = true;
 let sonSes = null;
 let seciliDosya = null;
+let gecmis = [];
 
 const chat=$('chat'), input=$('input');
 input.addEventListener('input', ()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; });
@@ -194,6 +195,12 @@ async function seslendir(metin){
   }
 }
 
+function gecmiseEkle(soru, cevap){
+  gecmis.push({ rol:'user', metin: soru || '(dosya gönderdi)' });
+  gecmis.push({ rol:'esta', metin: cevap });
+  if(gecmis.length > 20) gecmis = gecmis.slice(-20);
+}
+
 async function gonder(){
   const soru=input.value.trim();
   if(!soru && !seciliDosya) return;
@@ -207,17 +214,18 @@ async function gonder(){
   const bekle=ekle('esta', dosya ? 'Esta belgeyi okuyor...' : 'Esta düşünüyor...', true);
   $('send').disabled=true;
   try{
-    const body = { question: soru };
+    const body = { question: soru, gecmis: gecmis };
     if(dosya) body.dosya = { data: dosya.data, type: dosya.type };
     const r=await fetch(SERVER+'/ask',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const data=await r.json();
     bekle.remove();
     const cevap = data.answer || (data.error ? ('Hata: '+data.error) : 'Cevap alınamadı.');
     ekle('esta', cevap);
+    gecmiseEkle(soru, cevap);
     seslendir(cevap);
   }catch(err){
     bekle.remove();
-    ekle('esta','Sunucuya ulaşamadım. (İlk açılışta sunucu uyanması 50 sn sürebilir, tekrar dene.)');
+    ekle('esta','Sunucuya ulaşamadım. Bir saniye, tekrar dene.');
   }finally{ $('send').disabled=false; }
 }
 
@@ -231,26 +239,24 @@ if(SR){
   rec.onresult=(e)=>{ input.value=e.results[0][0].transcript; gonder(); };
 }else{ $('mic').style.display='none'; }
 
-// Açılışta Esta seni karşılasın ve günü özetlesin
+// Açılışta Esta arkadaş gibi karşılasın (iş konuşmadan)
 window.addEventListener('load', ()=>{
   setTimeout(async ()=>{
-    const saat = new Date().getHours();
-    const selam = saat < 11 ? 'Günaydın' : (saat < 18 ? 'Merhaba' : 'İyi akşamlar');
-    const bekle = ekle('esta', 'Esta bakıyor...', true);
+    const bekle = ekle('esta', '...', true);
     try{
       const r = await fetch(SERVER+'/ask', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ question: selam + ' de ve bugünün kısa özetini ver. Yaklaşan hatırlatmalar, biten kontratlar, ödeme günleri, kasa durumu gibi önemli ne varsa söyle. Önemli bir şey yoksa sadece sıcak bir selam ver ve nasıl olduğumu sor. Kısa tut, arkadaş gibi konuş.' })
+        body: JSON.stringify({ question: '(Halime uygulamayı yeni açtı. Ona kısa, sıcak, arkadaşça bir selam ver. İş konuşma, sadece nasıl olduğunu sor ya da güzel bir laf at. Çok kısa tut, bir iki cümle.)', gecmis: [] })
       });
       const data = await r.json();
       bekle.remove();
-      const cevap = data.answer || (selam + ' Halime! Bugün nasılsın?');
+      const cevap = data.answer || 'Halime! Gel bakalım, nasılsın?';
       ekle('esta', cevap);
+      gecmiseEkle('(açılış)', cevap);
       seslendir(cevap);
     }catch(err){
       bekle.remove();
-      ekle('esta', selam + ' Halime! Sunucu uyanıyor, bir saniye... Sonra konuşalım.');
     }
   }, 600);
 });
