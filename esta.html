@@ -230,6 +230,30 @@ if(SR){
   rec.onend=()=>{ dinliyor=false; $('mic').classList.remove('on'); };
   rec.onresult=(e)=>{ input.value=e.results[0][0].transcript; gonder(); };
 }else{ $('mic').style.display='none'; }
+
+// Açılışta Esta seni karşılasın ve günü özetlesin
+window.addEventListener('load', ()=>{
+  setTimeout(async ()=>{
+    const saat = new Date().getHours();
+    const selam = saat < 11 ? 'Günaydın' : (saat < 18 ? 'Merhaba' : 'İyi akşamlar');
+    const bekle = ekle('esta', 'Esta bakıyor...', true);
+    try{
+      const r = await fetch(SERVER+'/ask', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ question: selam + ' de ve bugünün kısa özetini ver. Yaklaşan hatırlatmalar, biten kontratlar, ödeme günleri, kasa durumu gibi önemli ne varsa söyle. Önemli bir şey yoksa sadece sıcak bir selam ver ve nasıl olduğumu sor. Kısa tut, arkadaş gibi konuş.' })
+      });
+      const data = await r.json();
+      bekle.remove();
+      const cevap = data.answer || (selam + ' Halime! Bugün nasılsın?');
+      ekle('esta', cevap);
+      seslendir(cevap);
+    }catch(err){
+      bekle.remove();
+      ekle('esta', selam + ' Halime! Sunucu uyanıyor, bir saniye... Sonra konuşalım.');
+    }
+  }, 600);
+});
 </script>
 </body>
 </html>
