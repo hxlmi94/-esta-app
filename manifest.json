@@ -8,16 +8,16 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/-esta-app/esta-ikon.png",
+      "src": "/-esta-app/%C4%B0KON.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/-esta-app/esta-ikon.png",
+      "src": "/-esta-app/%C4%B0KON.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
