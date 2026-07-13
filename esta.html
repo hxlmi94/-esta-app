@@ -201,6 +201,18 @@ function gecmiseEkle(soru, cevap){
   if(gecmis.length > 20) gecmis = gecmis.slice(-20);
 }
 
+function konumAc(cevap){
+  const konum = cevap.match(/\[\[KONUM\|([^|]*)\|?([^\]]*)\]\]/);
+  if(!konum) return cevap;
+  const adres = konum[1].trim();
+  const mod = (konum[2] || 'transit').trim();
+  const temiz = cevap.replace(konum[0], '').trim();
+  setTimeout(()=>{
+    window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(adres)+'&travelmode='+mod, '_blank');
+  }, 1500);
+  return temiz;
+}
+
 async function gonder(){
   const soru=input.value.trim();
   if(!soru && !seciliDosya) return;
@@ -219,7 +231,8 @@ async function gonder(){
     const r=await fetch(SERVER+'/ask',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const data=await r.json();
     bekle.remove();
-    const cevap = data.answer || (data.error ? ('Hata: '+data.error) : 'Cevap alınamadı.');
+    let cevap = data.answer || (data.error ? ('Hata: '+data.error) : 'Cevap alınamadı.');
+    cevap = konumAc(cevap);
     ekle('esta', cevap);
     gecmiseEkle(soru, cevap);
     seslendir(cevap);
@@ -239,7 +252,7 @@ if(SR){
   rec.onresult=(e)=>{ input.value=e.results[0][0].transcript; gonder(); };
 }else{ $('mic').style.display='none'; }
 
-// Açılışta Esta arkadaş gibi karşılasın (iş konuşmadan)
+// Açılışta Esta arkadaş gibi karşılasın
 window.addEventListener('load', ()=>{
   setTimeout(async ()=>{
     const bekle = ekle('esta', '...', true);
