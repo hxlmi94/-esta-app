@@ -12,7 +12,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="ESTA">
 <link rel="apple-touch-icon" href="/-esta-app/%C4%B0KON.png">
-<style>
+@media (max-width: 600px){
+    header{padding:12px 14px}
+    .brand .logo{font-size:22px}
+    .brand .sub{display:none}
+    .top-actions .btn{padding:7px 10px;font-size:12px}
+    .chat{padding:16px 12px}
+    .bubble{max-width:88%;font-size:14.5px}
+    .karsilama .logo{font-size:42px}
+    .inputbar{padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+    .inputwrap{gap:6px;flex-wrap:nowrap}
+    .ico{padding:11px 10px;font-size:16px}
+    textarea{font-size:16px;padding:11px 10px;min-width:0}
+    .send{padding:11px 12px;font-size:13px}
+    .dosya-onizleme{padding:6px 10px}
+  }
+  <style>
   :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
