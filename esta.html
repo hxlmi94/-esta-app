@@ -18,7 +18,6 @@
   html,body{height:100%}
   body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;display:flex;flex-direction:column;height:100vh}
   a{color:inherit;text-decoration:none}
-  h1{font-family:'Cormorant Garamond',serif;font-weight:600;letter-spacing:.5px}
   header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
   .brand{display:flex;align-items:center;gap:12px}
   .brand .logo{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);letter-spacing:3px}
@@ -33,19 +32,27 @@
   .msg.user .bubble{background:linear-gradient(180deg,var(--wine-soft),var(--wine));color:#fff;border-bottom-right-radius:4px}
   .msg.esta .bubble{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-bottom-left-radius:4px}
   .msg.esta .bubble.think{color:var(--muted);font-style:italic}
+  .bubble img{max-width:200px;border-radius:8px;margin-bottom:8px;display:block}
   .karsilama{text-align:center;color:var(--muted);margin-top:40px}
   .karsilama .logo{font-family:'Cormorant Garamond',serif;font-size:52px;color:var(--gold);margin-bottom:8px}
   .oneri{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px}
   .oneri .o{padding:9px 14px;border:1px solid var(--line);border-radius:20px;cursor:pointer;font-size:13px;color:var(--gold-soft)}
   .oneri .o:hover{border-color:var(--gold)}
-  .inputbar{border-top:1px solid var(--line);padding:16px 24px;background:linear-gradient(180deg,#0e0c0d,#140f10)}
-  .inputwrap{max-width:820px;margin:0 auto;display:flex;gap:10px;align-items:flex-end}
+  .inputbar{border-top:1px solid var(--line);padding:14px 20px;background:linear-gradient(180deg,#0e0c0d,#140f10)}
+  .inputwrap{max-width:820px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
   textarea{flex:1;background:#0f0b0c;border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--text);font-family:'Jost',sans-serif;font-size:15px;resize:none;max-height:140px}
   textarea:focus{outline:none;border-color:var(--gold)}
-  .send{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;border-radius:12px;padding:13px 20px;font-weight:500;cursor:pointer;font-family:'Jost',sans-serif}
+  .send{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;border-radius:12px;padding:13px 18px;font-weight:500;cursor:pointer;font-family:'Jost',sans-serif}
   .send:disabled{opacity:.5;cursor:default}
-  .mic{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:13px 15px;cursor:pointer;font-size:16px}
-  .mic.on{background:var(--wine);color:#fff;border-color:transparent}
+  .ico{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:13px 13px;cursor:pointer;font-size:17px;line-height:1}
+  .ico:hover{border-color:var(--gold)}
+  .ico.on{background:var(--wine);color:#fff;border-color:transparent}
+  .dosya-onizleme{max-width:820px;margin:0 auto 10px;display:none;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+  .dosya-onizleme.show{display:flex}
+  .dosya-onizleme img{height:44px;border-radius:6px}
+  .dosya-onizleme span{font-size:13px;color:var(--gold-soft);flex:1}
+  .dosya-onizleme button{background:transparent;border:none;color:#e08f8f;cursor:pointer;font-size:18px}
+  input[type=file]{display:none}
 </style>
 </head>
 <body>
@@ -59,25 +66,37 @@
 <div class="chat" id="chat">
   <div class="karsilama" id="karsilama">
     <div class="logo">Esta</div>
-    <div>Merhaba. Projeler, kontratlar, kişiler, ödemeler... ne sormak istersen sor.</div>
+    <div>Merhaba Halime. Sohbet edebiliriz, işini sorabilirsin, ya da bir belge/fatura gönder — okuyayım.</div>
     <div class="oneri">
-      <div class="o">Bu hafta ne var?</div>
-      <div class="o">Yaklaşan kontrat bitişleri</div>
-      <div class="o">Devam eden projeler</div>
+      <div class="o">Bugün ne yapmalıyım?</div>
+      <div class="o">Kasada durum ne?</div>
+      <div class="o">Nasılsın?</div>
     </div>
   </div>
 </div>
-<div class="inputbar"><div class="inputwrap">
-  <button class="mic" id="mic" title="Konuş">🎤</button>
-  <textarea id="input" rows="1" placeholder="Esta'ya yaz ya da mikrofona bas..."></textarea>
-  <button class="send" id="send">Gönder</button>
-</div></div>
+<div class="inputbar">
+  <div class="dosya-onizleme" id="onizleme">
+    <img id="onizlemeImg" style="display:none">
+    <span id="onizlemeAd"></span>
+    <button id="dosyaSil">✕</button>
+  </div>
+  <div class="inputwrap">
+    <button class="ico" id="dosyaBtn" title="Dosya seç">📎</button>
+    <button class="ico" id="kameraBtn" title="Fotoğraf çek">📷</button>
+    <button class="ico" id="mic" title="Konuş">🎤</button>
+    <textarea id="input" rows="1" placeholder="Esta'ya yaz, konuş ya da belge gönder..."></textarea>
+    <button class="send" id="send">Gönder</button>
+  </div>
+</div>
+<input type="file" id="dosyaInput" accept="image/*,application/pdf">
+<input type="file" id="kameraInput" accept="image/*" capture="environment">
 
 <script>
 const SERVER = 'https://esta-server.onrender.com';
 const $ = (id)=>document.getElementById(id);
 let sesAcik = true;
 let sonSes = null;
+let seciliDosya = null;
 
 const chat=$('chat'), input=$('input');
 input.addEventListener('input', ()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,140)+'px'; });
@@ -87,11 +106,39 @@ document.querySelectorAll('.oneri .o').forEach(o=>o.onclick=()=>{ input.value=o.
 
 $('sesToggle').onclick=()=>{ sesAcik=!sesAcik; $('sesToggle').textContent = sesAcik?'🔊 Ses: Açık':'🔇 Ses: Kapalı'; if(!sesAcik){ if(sonSes){sonSes.pause();sonSes=null;} if('speechSynthesis' in window) speechSynthesis.cancel(); } };
 
-function ekle(kim, metin, think){
+// Dosya ve kamera
+$('dosyaBtn').onclick = ()=> $('dosyaInput').click();
+$('kameraBtn').onclick = ()=> $('kameraInput').click();
+$('dosyaInput').onchange = (e)=> dosyaSec(e.target.files[0]);
+$('kameraInput').onchange = (e)=> dosyaSec(e.target.files[0]);
+$('dosyaSil').onclick = ()=>{ seciliDosya=null; $('onizleme').classList.remove('show'); $('dosyaInput').value=''; $('kameraInput').value=''; };
+
+function dosyaSec(f){
+  if(!f) return;
+  if(f.size > 18*1024*1024){ alert('Dosya çok büyük (en fazla 18 MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const base64 = reader.result.split(',')[1];
+    seciliDosya = { data: base64, type: f.type, name: f.name };
+    $('onizleme').classList.add('show');
+    $('onizlemeAd').textContent = f.name;
+    if(f.type.startsWith('image/')){
+      $('onizlemeImg').src = reader.result;
+      $('onizlemeImg').style.display = 'block';
+    } else {
+      $('onizlemeImg').style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(f);
+}
+
+function ekle(kim, metin, think, resimUrl){
   const k=$('karsilama'); if(k) k.remove();
   const d=document.createElement('div'); d.className='msg '+kim;
-  d.innerHTML='<div class="bubble'+(think?' think':'')+'"></div>';
-  d.querySelector('.bubble').textContent=metin;
+  const b=document.createElement('div'); b.className='bubble'+(think?' think':'');
+  if(resimUrl){ const im=document.createElement('img'); im.src=resimUrl; b.appendChild(im); }
+  const t=document.createElement('div'); t.textContent=metin; b.appendChild(t);
+  d.appendChild(b);
   chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
   return d;
 }
@@ -121,8 +168,7 @@ async function seslendir(metin){
     const r = await fetch(SERVER+'/ses', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ metin: temiz }) });
     if(!r.ok) throw new Error('ses alinamadi');
     const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    sonSes = new Audio(url);
+    sonSes = new Audio(URL.createObjectURL(blob));
     sonSes.play();
   }catch(err){
     if('speechSynthesis' in window){
@@ -134,13 +180,21 @@ async function seslendir(metin){
 }
 
 async function gonder(){
-  const soru=input.value.trim(); if(!soru) return;
+  const soru=input.value.trim();
+  if(!soru && !seciliDosya) return;
+  const dosya = seciliDosya;
+  const resimUrl = (dosya && dosya.type.startsWith('image/')) ? 'data:'+dosya.type+';base64,'+dosya.data : null;
+
   input.value=''; input.style.height='auto';
-  ekle('user', soru);
-  const bekle=ekle('esta','Esta düşünüyor...', true);
+  seciliDosya=null; $('onizleme').classList.remove('show'); $('dosyaInput').value=''; $('kameraInput').value='';
+
+  ekle('user', soru || (dosya ? dosya.name : ''), false, resimUrl);
+  const bekle=ekle('esta', dosya ? 'Esta belgeyi okuyor...' : 'Esta düşünüyor...', true);
   $('send').disabled=true;
   try{
-    const r=await fetch(SERVER+'/ask',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ question:soru }) });
+    const body = { question: soru };
+    if(dosya) body.dosya = { data: dosya.data, type: dosya.type };
+    const r=await fetch(SERVER+'/ask',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const data=await r.json();
     bekle.remove();
     const cevap = data.answer || (data.error ? ('Hata: '+data.error) : 'Cevap alınamadı.');
