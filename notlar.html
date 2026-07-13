@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Notlar & Hatırlatmalar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88;--green:#9fd58a;--red:#e0a0a0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .logo{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);letter-spacing:3px}
+  .sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:8px 14px;border-radius:8px}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .btn.gold{background:linear-gradient(180deg,var(--gold),#a9842f);color:#1a1206;border:none;font-weight:500}
+  .btn.danger{color:#e08f8f;border-color:#5a2a2a;background:transparent;padding:5px 10px;font-size:12px}
+  .wrap{max-width:820px;margin:0 auto;padding:28px 20px 70px}
+  .head-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+  .head-row h2{font-size:32px}
+  .head-row p{color:var(--muted);font-size:14px;margin-top:3px}
+  .izin{background:linear-gradient(180deg,#2a2416,#1c180f);border:1px solid #5a4a2a;border-radius:12px;padding:14px 16px;margin-bottom:18px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .izin.gizli{display:none}
+  .grup{margin-bottom:24px}
+  .grup h3{font-size:20px;color:var(--gold-soft);margin-bottom:10px}
+  .item{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;overflow:hidden}
+  .item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .item.yakin::before{background:linear-gradient(180deg,#e0a0a0,#7b1f2b)}
+  .item.gecti{opacity:.5}
+  .item .ic{flex:1}
+  .item .baslik{font-size:15px;margin-bottom:3px}
+  .item .zaman{font-size:12px;color:var(--muted)}
+  .item .zaman b{color:var(--red)}
+  .rozet{font-size:11px;padding:3px 9px;border-radius:20px;background:#2a1f2e;color:#d0a8d8;margin-right:8px}
+  .rozet.h{background:#3a3320;color:#d6c27a}
+  .empty{text-align:center;color:var(--muted);padding:46px 20px;border:1px dashed var(--line);border-radius:14px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none}
+  .toast.show{display:block}
+  @media(max-width:600px){ header{padding:12px 14px} .sub{display:none} .wrap{padding:18px 14px 60px} .head-row h2{font-size:26px} }
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px"><div class="logo">ESTA</div><div class="sub">Notlar</div></div>
+  <div style="display:flex;gap:8px">
+    <a class="btn" href="esta.html">Esta'ya Sor</a>
+    <a class="btn" href="panel.html">← Panel</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="head-row">
+    <div><h2>Notlar & Hatırlatmalar</h2><p>Esta'nın senin için tuttukları.</p></div>
+  </div>
+
+  <div class="izin" id="izinKutu">
+    <span>🔔 Hatırlatma zamanı gelince bildirim almak ister misin?</span>
+    <button class="btn gold" id="izinBtn">Bildirime İzin Ver</button>
+  </div>
+
+  <div id="alan"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=> (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+
+// Bildirim izni
+function izinDurum(){
+  if(!('Notification' in window)){ $('izinKutu').classList.add('gizli'); return; }
+  if(Notification.permission === 'granted'){ $('izinKutu').classList.add('gizli'); }
+}
+izinDurum();
+$('izinBtn').onclick = async ()=>{
+  if(!('Notification' in window)){ toast('Bu cihaz bildirimi desteklemiyor'); return; }
+  const p = await Notification.requestPermission();
+  if(p === 'granted'){ toast('Bildirim açıldı ✓'); $('izinKutu').classList.add('gizli'); bildirimKontrol(); }
+  else toast('İzin verilmedi');
+};
+
+function zamanMetni(t){
+  if(!t) return 'Tarih yok';
+  const d = new Date(t);
+  const fark = Math.round((d - new Date())/60000); // dakika
+  const tarih = d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  if(fark < 0) return tarih + ' (geçti)';
+  if(fark < 60) return tarih + ' — <b>'+fark+' dakika kaldı</b>';
+  if(fark < 1440) return tarih + ' — <b>'+Math.round(fark/60)+' saat kaldı</b>';
+  const gun = Math.round(fark/1440);
+  return tarih + (gun<=7 ? ' — <b>'+gun+' gün kaldı</b>' : '');
+}
+
+let kayitlar = [];
+async function load(){
+  const alan = $('alan');
+  alan.innerHTML = '<p style="color:var(--muted)">Yükleniyor...</p>';
+  const { data, error } = await supabase.from('notlar').select('*').order('created_at',{ascending:false});
+  if(error){ alan.innerHTML='<p style="color:#e08f8f">Hata: '+esc(error.message)+'</p>'; return; }
+  kayitlar = data || [];
+
+  const hatirlatmalar = kayitlar.filter(k=>k.tarih).sort((a,b)=> new Date(a.tarih)-new Date(b.tarih));
+  const notlar = kayitlar.filter(k=>!k.tarih);
+
+  let html = '';
+
+  if(hatirlatmalar.length){
+    html += '<div class="grup"><h3>Hatırlatmalar</h3>';
+    hatirlatmalar.forEach(k=>{
+      const d = new Date(k.tarih);
+      const fark = (d - new Date())/60000;
+      const cls = fark < 0 ? 'gecti' : (fark < 1440 ? 'yakin' : '');
+      html += '<div class="item '+cls+'"><div class="ic">'+
+        '<div class="baslik"><span class="rozet h">Hatırlatma</span>'+esc(k.icerik)+'</div>'+
+        '<div class="zaman">'+zamanMetni(k.tarih)+'</div></div>'+
+        '<button class="btn danger" data-del="'+k.id+'">Sil</button></div>';
+    });
+    html += '</div>';
+  }
+
+  if(notlar.length){
+    html += '<div class="grup"><h3>Notlar</h3>';
+    notlar.forEach(k=>{
+      const t = new Date(k.created_at).toLocaleDateString('tr-TR');
+      html += '<div class="item"><div class="ic">'+
+        '<div class="baslik"><span class="rozet">Not</span>'+esc(k.icerik)+'</div>'+
+        '<div class="zaman">'+t+'</div></div>'+
+        '<button class="btn danger" data-del="'+k.id+'">Sil</button></div>';
+    });
+    html += '</div>';
+  }
+
+  if(!hatirlatmalar.length && !notlar.length){
+    html = '<div class="empty">Henüz not yok. Esta\'ya "not al: ..." ya da "yarın 3te randevum var" de, o kaydeder.</div>';
+  }
+
+  alan.innerHTML = html;
+  alan.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick = async ()=>{
+      if(!confirm('Silinsin mi?')) return;
+      await supabase.from('notlar').delete().eq('id', b.dataset.del);
+      toast('Silindi'); load();
+    };
+  });
+}
+
+// Hatırlatma zamanı gelince bildirim
+const bildirilenler = new Set();
+function bildirimKontrol(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const simdi = new Date();
+  kayitlar.filter(k=>k.tarih && !k.yapildi).forEach(k=>{
+    const d = new Date(k.tarih);
+    const fark = (d - simdi)/60000; // dakika
+    // 15 dakika kala veya zamanı geldiğinde
+    if(fark <= 15 && fark > -60 && !bildirilenler.has(k.id)){
+      bildirilenler.add(k.id);
+      const ne = fark <= 0 ? 'Şimdi' : Math.round(fark)+' dakika sonra';
+      new Notification('ESTA — Hatırlatma', {
+        body: k.icerik + '\n' + ne,
+        icon: '/-esta-app/%C4%B0KON.png',
+        tag: k.id
+      });
+    }
+  });
+}
+
+await load();
+bildirimKontrol();
+setInterval(async ()=>{ await load(); bildirimKontrol(); }, 60000); // her dakika kontrol
+</script>
+</body>
+</html>
