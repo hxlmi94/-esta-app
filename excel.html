@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Excel İndir</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root{--bg:#0e0c0d;--panel:#181314;--panel-2:#201719;--line:#352529;--wine:#7b1f2b;--wine-soft:#9a2c3a;--gold:#c9a24b;--gold-soft:#e2c477;--text:#ece4dd;--muted:#9c8f88}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 70% -10%, #1d1416 0%, var(--bg) 60%);color:var(--text);font-family:'Jost',sans-serif;min-height:100vh;font-weight:300}
+  a{color:inherit;text-decoration:none}
+  h2,h3{font-family:'Cormorant Garamond',serif;font-weight:600}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1314,#0e0c0d)}
+  .logo{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold);letter-spacing:3px}
+  .sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .btn{font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);padding:8px 14px;border-radius:8px}
+  .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
+  .wrap{max-width:900px;margin:0 auto;padding:30px 20px 70px}
+  .wrap>h2{font-size:32px;margin-bottom:4px}
+  .wrap>p{color:var(--muted);font-size:14px;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .card{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:20px;position:relative;overflow:hidden;cursor:pointer;transition:.2s}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold),var(--wine))}
+  .card:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .card h3{font-size:21px;margin-bottom:5px}
+  .card p{font-size:13px;color:var(--muted)}
+  .card .ind{margin-top:14px;font-size:13px;color:var(--gold-soft)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1416;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 20px;border-radius:10px;font-size:14px;display:none}
+  .toast.show{display:block}
+  @media(max-width:600px){ header{padding:12px 14px} .sub{display:none} .wrap{padding:20px 14px 60px} }
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px"><div class="logo">ESTA</div><div class="sub">Excel İndir</div></div>
+  <div style="display:flex;gap:8px">
+    <a class="btn" href="esta.html">Esta'ya Sor</a>
+    <a class="btn" href="panel.html">← Panel</a>
+  </div>
+</header>
+<div class="wrap">
+  <h2>Excel İndir</h2>
+  <p>İstediğin veriyi Excel olarak indir. Özet için Esta'ya sorabilirsin.</p>
+  <div class="grid">
+    <div class="card" data-t="hareketler"><h3>💰 Kasa</h3><p>Tüm gelir-gider hareketleri</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="kontratlar"><h3>📄 Kontratlar</h3><p>Kira ve satış kayıtları</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="projeler"><h3>🏗️ Projeler</h3><p>İnşaat ve proje takibi</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="ilanlar"><h3>🏠 İlanlar</h3><p>Satılık / kiralık portföy</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="kisiler"><h3>👤 Kişiler</h3><p>Müşteri, kiracı, malik</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="notlar"><h3>📝 Notlar</h3><p>Notlar ve hatırlatmalar</p><div class="ind">Excel indir →</div></div>
+    <div class="card" data-t="hepsi" style="grid-column:1/-1"><h3>📦 Hepsi Bir Arada</h3><p>Tüm veriler, her biri ayrı sayfada</p><div class="ind">Excel indir →</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient('https://pqwdvquguxddyymcpycl.supabase.co','sb_publishable_kO2P-u-K-TfRlbwFvlQAsg_Pek28vM7');
+const $ = (id)=>document.getElementById(id);
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session){ location.href='login.html'; }
+
+const ADLAR = {
+  hareketler:'Kasa', kontratlar:'Kontratlar', projeler:'Projeler',
+  ilanlar:'Ilanlar', kisiler:'Kisiler', notlar:'Notlar'
+};
+
+async function cek(tablo){
+  const { data, error } = await supabase.from(tablo).select('*');
+  if(error) throw new Error(error.message);
+  return (data||[]).map(r=>{ const o={...r}; delete o.user_id; delete o.id; return o; });
+}
+
+function tarihEk(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+document.querySelectorAll('.card').forEach(c=>{
+  c.onclick = async ()=>{
+    const t = c.dataset.t;
+    toast('Hazırlanıyor...');
+    try{
+      const wb = XLSX.utils.book_new();
+      if(t==='hepsi'){
+        for(const [tab, ad] of Object.entries(ADLAR)){
+          const veri = await cek(tab);
+          const ws = XLSX.utils.json_to_sheet(veri.length?veri:[{bilgi:'kayit yok'}]);
+          XLSX.utils.book_append_sheet(wb, ws, ad);
+        }
+        XLSX.writeFile(wb, 'ESTA-tum-veriler-'+tarihEk()+'.xlsx');
+      } else {
+        const veri = await cek(t);
+        if(!veri.length){ toast('Bu tabloda kayıt yok'); return; }
+        const ws = XLSX.utils.json_to_sheet(veri);
+        XLSX.utils.book_append_sheet(wb, ws, ADLAR[t]);
+        XLSX.writeFile(wb, 'ESTA-'+ADLAR[t]+'-'+tarihEk()+'.xlsx');
+      }
+      toast('İndirildi ✓');
+    }catch(err){ toast('Hata: '+err.message); }
+  };
+});
+</script>
+</body>
+</html>
